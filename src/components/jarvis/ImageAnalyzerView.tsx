@@ -4,7 +4,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import {
   Eye,
   Upload,
-  Image,
+  Image as ImageIcon,
   Sparkles,
   Copy,
   Check,
@@ -308,7 +308,7 @@ ${analysis.suggestions.join('\n')}`;
         {/* URL Input */}
         <div className="jarvis-hud-card p-3">
           <div className="flex items-center gap-2">
-            <Image size={12} style={{ color: '#8b5cf6' }} />
+            <ImageIcon size={12} style={{ color: '#8b5cf6' }} />
             <input
               type="text"
               value={imageUrl}
