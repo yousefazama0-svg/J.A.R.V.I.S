@@ -82,15 +82,15 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
   ];
 
   const capabilities = language === 'ar' ? [
-    { label: 'توليد AI', color: '#00e5ff' },
-    { label: 'مساعد صوتي', color: '#0088cc' },
-    { label: 'إجراءات ذكية', color: '#a855f7' },
-    { label: 'تحميل الكل', color: '#10b981' },
+    { label: 'توليد AI', color: '#00b4ff' },
+    { label: 'مساعد صوتي', color: '#0096ff' },
+    { label: 'إجراءات ذكية', color: '#00d4ff' },
+    { label: 'تحميل الكل', color: '#00a8ff' },
   ] : [
-    { label: 'AI Generation', color: '#00e5ff' },
-    { label: 'Voice Assistant', color: '#0088cc' },
-    { label: 'Smart Actions', color: '#a855f7' },
-    { label: 'Download All', color: '#10b981' },
+    { label: 'AI Generation', color: '#00b4ff' },
+    { label: 'Voice Assistant', color: '#0096ff' },
+    { label: 'Smart Actions', color: '#00d4ff' },
+    { label: 'Download All', color: '#00a8ff' },
   ];
 
   return (
@@ -155,7 +155,7 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
         <div className="flex justify-center -mt-2 mb-4">
           <div className="relative w-[240px] h-[20px] overflow-hidden">
             <div className="jarvis-rotating-text flex items-center justify-center text-[7px] tracking-[0.3em] uppercase whitespace-nowrap"
-              style={{ color: 'rgba(0, 229, 255, 0.5)' }}>
+              style={{ color: 'rgba(0, 180, 255, 0.5)' }}>
               <span>ARC REACTOR • ONLINE • POWER STABLE • ARC REACTOR • ONLINE • POWER STABLE • ARC REACTOR • ONLINE • POWER STABLE •</span>
             </div>
           </div>
@@ -163,19 +163,19 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
 
         {/* Status badges */}
         <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
-          <div className="jarvis-badge" style={{ background: 'rgba(0, 229, 255, 0.08)', border: '1px solid rgba(0, 229, 255, 0.15)', color: '#00e5ff' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 180, 255, 0.1)', border: '1px solid rgba(0, 180, 255, 0.2)', color: '#00b4ff' }}>
             <MessageSquare size={10} />
             <span>24 msgs</span>
           </div>
-          <div className="jarvis-badge" style={{ background: 'rgba(124, 92, 255, 0.08)', border: '1px solid rgba(124, 92, 255, 0.15)', color: '#7c5cff' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 150, 255, 0.1)', border: '1px solid rgba(0, 150, 255, 0.2)', color: '#0096ff' }}>
             <Camera size={10} />
             <span>128 images</span>
           </div>
-          <div className="jarvis-badge" style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 200, 255, 0.1)', border: '1px solid rgba(0, 200, 255, 0.2)', color: '#00c8ff' }}>
             <Video size={10} />
             <span>12 videos</span>
           </div>
-          <div className="jarvis-badge" style={{ background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 168, 255, 0.1)', border: '1px solid rgba(0, 168, 255, 0.2)', color: '#00a8ff' }}>
             <Presentation size={10} />
             <span>8 slides</span>
           </div>
@@ -184,14 +184,14 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
         {/* Session uptime */}
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-[8px] tracking-wider uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{translations.session}</span>
-          <span className="text-[11px] tracking-wider font-mono" style={{ color: '#00e5ff' }}>{formatUptime(uptime)}</span>
+          <span className="text-[11px] tracking-wider font-mono" style={{ color: '#00b4ff' }}>{formatUptime(uptime)}</span>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-4 gap-2 mb-3">
           {quickActions.map((action, idx) => {
             const Icon = action.icon;
-            const colors = ['#00e5ff', '#7c5cff', '#f59e0b', '#00e5ff'];
+            const colors = ['#00b4ff', '#0096ff', '#00d4ff', '#00a8ff'];
             return (
               <div key={idx} className="jarvis-quick-action" style={{ color: colors[idx] }}>
                 <Icon size={16} />
