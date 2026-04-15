@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { NextRequest } from "next/server";
+import groq, { GROQ_MODELS } from "@/lib/groq";
 
 interface Slide {
   title: string;
@@ -8,148 +8,92 @@ interface Slide {
   notes: string;
 }
 
-const LAYOUTS = ['title-slide', 'content', 'two-column', 'image', 'quote', 'blank'];
+interface GenerateRequest {
+  topic: string;
+  slideCount: number;
+  style: string;
+  language: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { topic, slideCount = 8, style = 'professional', language = 'en' } = body;
+    const body: GenerateRequest = await request.json();
+    const { topic, slideCount, style, language } = body;
 
-    if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Topic is required and must be a non-empty string' },
-        { status: 400 }
-      );
+    if (!topic?.trim()) {
+      return new Response(JSON.stringify({ error: "Topic is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    const zai = await ZAI.create();
+    const systemPrompt = `You are an expert presentation designer. Create engaging, well-structured slides.
+Return ONLY valid JSON array of slides, no markdown formatting.`;
 
-    // Build system prompt for presentation generation
-    const systemPrompt = language === 'ar' 
-      ? `أنت خبير في إنشاء العروض التقديمية الاحترافية. قم بإنشاء عرض تقديمي عن الموضوع المحدد. يجب أن تكون الإجابة بتنسيق JSON فقط بدون أي نص إضافي. كل شريحة يجب أن تحتوي على عنوان (title) ومحتوى (content) وتخطيط (layout) وملاحظات المتحدث (notes). الأنماط المتاحة: ${LAYOUTS.join(', ')}.`
-      : `You are an expert presentation creator. Create a professional presentation about the given topic. Respond with valid JSON only, no additional text. Each slide must have title, content, layout, and notes fields. Available layouts: ${LAYOUTS.join(', ')}. Style: ${style}.`;
+    const userPrompt = language === 'ar' 
+      ? `أنشئ عرض تقديمي عن "${topic}" يتكون من ${slideCount} شريحة بأسلوب ${style}.
 
-    const userPrompt = language === 'ar'
-      ? `أنشئ عرضًا تقديميًا من ${slideCount} شريحة عن: ${topic}. أعد الإجابة كمصفوفة JSON تسمى slides. كل كائن شريحة يجب أن يحتوي على: title (عنوان قصير)، content (نقاط المحتوى مفصولة بأسطر جديدة)، layout (نوع التخطيط)، notes (ملاحظات المتحدث).`
-      : `Create a ${slideCount}-slide presentation about: ${topic}. Return as JSON array named "slides". Each slide object should have: title (short heading), content (bullet points separated by newlines), layout (one of: ${LAYOUTS.join(', ')}), notes (speaker notes for the presenter). Style: ${style}.`;
+أعد فقط مصفوفة JSON بهذا التنسيق بالضبط:
+[
+  {
+    "title": "عنوان الشريحة",
+    "content": "محتوى الشريحة (يمكن استخدام \\n للأسطر الجديدة)",
+    "layout": "title-slide | content | two-column | image | quote | blank",
+    "notes": "ملاحظات المحاضر"
+  }
+]
 
-    const completion = await zai.chat.completions.create({
+الشريحة الأولى يجب أن تكون title-slide. استخدم المحتوى باللغة العربية.`
+      : `Create a presentation about "${topic}" with ${slideCount} slides in ${style} style.
+
+Return ONLY a JSON array in this exact format:
+[
+  {
+    "title": "Slide title",
+    "content": "Slide content (use \\n for line breaks)",
+    "layout": "title-slide | content | two-column | image | quote | blank",
+    "notes": "Speaker notes"
+  }
+]
+
+First slide should be title-slide. Make it engaging and professional.`;
+
+    const completion = await groq.chat.completions.create({
+      model: GROQ_MODELS.chat,
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
       ],
       temperature: 0.7,
-      max_tokens: 4096,
+      max_tokens: 8000,
     });
 
-    const responseText = completion.choices?.[0]?.message?.content || '';
-
-    // Parse JSON from response
-    let slides: Slide[] = [];
+    const responseText = completion.choices?.[0]?.message?.content || "[]";
     
+    // Extract JSON from response
+    let slides: Slide[] = [];
     try {
-      // Try to extract JSON from the response
-      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+      // Try to parse directly first
+      slides = JSON.parse(responseText);
+    } catch {
+      // Try to extract JSON from markdown code block
+      const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
       if (jsonMatch) {
-        slides = JSON.parse(jsonMatch[0]);
+        slides = JSON.parse(jsonMatch[1]);
       } else {
-        const jsonObjectMatch = responseText.match(/\{[\s\S]*"slides"[\s\S]*\}/);
-        if (jsonObjectMatch) {
-          const parsed = JSON.parse(jsonObjectMatch[0]);
-          slides = parsed.slides || [];
+        // Try to find array in response
+        const arrayMatch = responseText.match(/\[[\s\S]*\]/);
+        if (arrayMatch) {
+          slides = JSON.parse(arrayMatch[0]);
         }
       }
-    } catch {
-      // If parsing fails, create default slides
-      slides = generateDefaultSlides(topic, slideCount, language);
     }
 
-    // Validate and fix slides
-    slides = slides.slice(0, slideCount).map((slide, index) => ({
-      title: slide.title || (language === 'ar' ? `شريحة ${index + 1}` : `Slide ${index + 1}`),
-      content: slide.content || (language === 'ar' ? 'محتوى الشريحة' : 'Slide content'),
-      layout: LAYOUTS.includes(slide.layout) ? slide.layout : (index === 0 ? 'title-slide' : 'content'),
-      notes: slide.notes || '',
-    }));
-
-    // Ensure we have the requested number of slides
-    while (slides.length < slideCount) {
-      const index = slides.length;
-      slides.push({
-        title: language === 'ar' ? `شريحة ${index + 1}` : `Slide ${index + 1}`,
-        content: language === 'ar' ? 'محتوى إضافي' : 'Additional content',
-        layout: 'content',
-        notes: '',
-      });
+    if (!Array.isArray(slides) || slides.length === 0) {
+      throw new Error("Failed to generate valid slides");
     }
 
-    return NextResponse.json({
-      success: true,
-      slides: slides,
-      topic: topic,
-      style: style,
-      slideCount: slides.length,
-      timestamp: new Date().toISOString(),
-    });
+    return new Response(JSON.stringify({ slides }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
-    console.error('[Slides Generate] Error:', error);
-    const message = error instanceof Error ? error.message : 'Presentation generation failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[Slides Generate] Error:", error);
+    const message = error instanceof Error ? error.message : "Failed to generate slides";
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
-}
-
-function generateDefaultSlides(topic: string, count: number, language: string): Slide[] {
-  const isArabic = language === 'ar';
-  const slides: Slide[] = [
-    {
-      title: topic,
-      content: isArabic ? `مرحباً بكم في عرض ${topic}` : `Welcome to the ${topic} presentation`,
-      layout: 'title-slide',
-      notes: isArabic ? 'مقدمة العرض' : 'Introduction to the presentation',
-    },
-    {
-      title: isArabic ? 'نظرة عامة' : 'Overview',
-      content: isArabic 
-        ? '• مقدمة\n• النقاط الرئيسية\n• التفاصيل\n• الخلاصة'
-        : '• Introduction\n• Key Points\n• Details\n• Conclusion',
-      layout: 'content',
-      notes: isArabic ? 'نظرة عامة على محتوى العرض' : 'Overview of presentation content',
-    },
-    {
-      title: isArabic ? 'النقاط الرئيسية' : 'Key Points',
-      content: isArabic 
-        ? '• النقطة الأولى\n• النقطة الثانية\n• النقطة الثالثة'
-        : '• First key point\n• Second key point\n• Third key point',
-      layout: 'two-column',
-      notes: isArabic ? 'مناقشة النقاط الرئيسية' : 'Discuss the key points',
-    },
-    {
-      title: isArabic ? 'التفاصيل' : 'Details',
-      content: isArabic 
-        ? 'المزيد من المعلومات التفصيلية حول الموضوع'
-        : 'More detailed information about the topic',
-      layout: 'content',
-      notes: isArabic ? 'شرح التفاصيل' : 'Explain the details',
-    },
-    {
-      title: isArabic ? 'الخلاصة' : 'Conclusion',
-      content: isArabic 
-        ? 'شكراً لاهتمامكم\nهل لديكم أسئلة؟'
-        : 'Thank you for your attention\nQuestions?',
-      layout: 'title-slide',
-      notes: isArabic ? 'اختتام العرض' : 'Wrap up the presentation',
-    },
-  ];
-
-  // Add more slides if needed
-  while (slides.length < count) {
-    slides.push({
-      title: isArabic ? `شريحة إضافية ${slides.length}` : `Additional Slide ${slides.length}`,
-      content: isArabic ? 'محتوى الشريحة' : 'Slide content',
-      layout: 'content',
-      notes: '',
-    });
-  }
-
-  return slides.slice(0, count);
 }

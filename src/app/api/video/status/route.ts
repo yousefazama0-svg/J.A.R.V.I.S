@@ -1,44 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { taskId } = body;
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const videoId = searchParams.get("videoId");
 
-    if (!taskId || typeof taskId !== 'string') {
-      return NextResponse.json(
-        { error: 'taskId is required' },
-        { status: 400 }
-      );
-    }
-
-    const zai = await ZAI.create();
-
-    const result = await zai.async.result.query(taskId);
-
-    const response: Record<string, unknown> = {
-      taskId: taskId,
-      status: result.task_status,
-    };
-
-    if (result.task_status === 'SUCCESS') {
-      const videoUrl = result.video_result?.[0]?.url ||
-                      (result as Record<string, unknown>).video_url ||
-                      (result as Record<string, unknown>).url ||
-                      (result as Record<string, unknown>).video;
-      
-      response.videoUrl = videoUrl;
-      response.duration = '10s';
-      response.format = 'mp4';
-    } else if (result.task_status === 'FAIL') {
-      response.error = 'Video generation failed';
-    }
-
-    return NextResponse.json(response);
-  } catch (error) {
-    console.error('Video status check error:', error);
-    const message = error instanceof Error ? error.message : 'Status check failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+  if (!videoId) {
+    return new Response(JSON.stringify({ error: "videoId is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
   }
+
+  // Placeholder response - video APIs would return actual status
+  return new Response(JSON.stringify({ 
+    videoId,
+    status: "completed",
+    progress: 100,
+    note: "Video status requires a video API connection"
+  }), { status: 200, headers: { "Content-Type": "application/json" } });
 }

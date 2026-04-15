@@ -1,49 +1,55 @@
-import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { NextRequest } from "next/server";
+import groq, { GROQ_MODELS } from "@/lib/groq";
+
+interface EnhanceRequest {
+  prompt: string;
+  style: string;
+  language: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { videoUrl, quality = 'high' } = body;
+    const body: EnhanceRequest = await request.json();
+    const { prompt, style, language } = body;
 
-    if (!videoUrl || typeof videoUrl !== 'string') {
-      return NextResponse.json(
-        { error: 'videoUrl is required' },
-        { status: 400 }
-      );
+    if (!prompt?.trim()) {
+      return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    // Note: Video enhancement would typically use image-to-video with enhancement prompt
-    // For now, we'll return a placeholder response indicating the feature
-    // In production, this would process the video through enhancement APIs
+    const systemPrompt = `You are an expert at enhancing video prompts for AI video generation.
+Given a basic prompt, enhance it with details about:
+- Camera movements (pan, zoom, tilt, etc.)
+- Scene transitions
+- Lighting and atmosphere
+- Motion and action
+- Visual style
 
-    const zai = await ZAI.create();
+Return ONLY the enhanced prompt, nothing else.`;
 
-    // Create an enhanced video task using the video frame as reference
-    const enhancementPrompts: Record<string, string> = {
-      medium: 'enhance video quality, improve colors and sharpness',
-      high: 'enhance video quality significantly, 4K upscaling, color correction, noise reduction',
-      ultra: 'enhance video to maximum quality, 8K upscaling, professional color grading, noise reduction, stabilization',
-    };
+    const userPrompt = language === 'ar'
+      ? `حسّن هذا الوصف لإنشاء فيديو بأسلوب ${style}: "${prompt}"`
+      : `Enhance this prompt for ${style} style video generation: "${prompt}"`;
 
-    // For video enhancement, we use image_url with the video frame
-    const task = await zai.video.generations.create({
-      prompt: enhancementPrompts[quality] || enhancementPrompts.high,
-      quality: 'quality',
-      duration: 5,
-      fps: 30,
+    const completion = await groq.chat.completions.create({
+      model: GROQ_MODELS.fast,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      temperature: 0.8,
+      max_tokens: 500,
     });
 
-    return NextResponse.json({
-      success: true,
-      taskId: task.id,
-      status: task.task_status,
-      message: 'Video enhancement task created',
-      quality: quality,
-    });
+    const enhancedPrompt = completion.choices?.[0]?.message?.content || prompt;
+
+    return new Response(JSON.stringify({ 
+      original: prompt,
+      enhanced: enhancedPrompt,
+      style 
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
-    console.error('Video enhancement error:', error);
-    const message = error instanceof Error ? error.message : 'Video enhancement failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[Video Enhance] Error:", error);
+    const message = error instanceof Error ? error.message : "Failed to enhance prompt";
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }

@@ -1,51 +1,56 @@
-import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { NextRequest } from "next/server";
+import groq, { GROQ_MODELS } from "@/lib/groq";
+
+interface EnhanceRequest {
+  prompt: string;
+  style: string;
+  language: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { image, quality = 'high' } = body;
+    const body: EnhanceRequest = await request.json();
+    const { prompt, style, language } = body;
 
-    if (!image || typeof image !== 'string') {
-      return NextResponse.json(
-        { error: 'Image base64 data is required' },
-        { status: 400 }
-      );
+    if (!prompt?.trim()) {
+      return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    // Create enhancement prompt based on quality
-    const qualityMap: Record<string, string> = {
-      low: 'enhance image quality, fix lighting issues, moderate improvement',
-      medium: 'enhance image quality, fix lighting and color issues, improve details, sharpen',
-      high: 'enhance image quality significantly, fix all issues, improve details, sharpen, upscale, professional enhancement',
-      ultra: 'enhance image quality to maximum, fix all issues, ultra detailed, professional photo enhancement, 4k quality, perfect lighting and colors',
-    };
+    // Use Groq to enhance the prompt
+    const systemPrompt = `You are an expert at enhancing image prompts for AI image generation.
+Given a basic prompt, enhance it with details about:
+- Composition and framing
+- Lighting and atmosphere
+- Style and artistic elements
+- Color palette
+- Mood and emotion
 
-    const enhancementPrompt = qualityMap[quality] || qualityMap.high;
+Return ONLY the enhanced prompt, nothing else.`;
 
-    const zai = await ZAI.create();
+    const userPrompt = language === 'ar'
+      ? `حسّن هذا الوصف لإنشاء صورة بأسلوب ${style}: "${prompt}"`
+      : `Enhance this prompt for ${style} style image generation: "${prompt}"`;
 
-    // Use image-to-image generation for enhancement
-    const response = await zai.images.generations.create({
-      prompt: `${enhancementPrompt}, maintain original composition and subject`,
-      size: '1024x1024',
+    const completion = await groq.chat.completions.create({
+      model: GROQ_MODELS.fast,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      temperature: 0.8,
+      max_tokens: 500,
     });
 
-    const enhancedImage = response.data?.[0]?.base64;
+    const enhancedPrompt = completion.choices?.[0]?.message?.content || prompt;
 
-    if (!enhancedImage) {
-      return NextResponse.json({ error: 'Enhancement failed' }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      image: enhancedImage,
-      size: '1024x1024',
-      quality: quality,
-    });
+    return new Response(JSON.stringify({ 
+      original: prompt,
+      enhanced: enhancedPrompt,
+      style 
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
-    console.error('Image enhancement error:', error);
-    const message = error instanceof Error ? error.message : 'Enhancement failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[Image Enhance] Error:", error);
+    const message = error instanceof Error ? error.message : "Failed to enhance prompt";
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }

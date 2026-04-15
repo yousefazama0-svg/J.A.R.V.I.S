@@ -1,59 +1,66 @@
-import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { NextRequest } from "next/server";
+import groq, { GROQ_MODELS } from "@/lib/groq";
+
+interface GenerateRequest {
+  prompt: string;
+  style: string;
+  aspectRatio: string;
+  language: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { prompt, size = '1024x1024', style = 'realistic' } = body;
+    const body: GenerateRequest = await request.json();
+    const { prompt, style, language } = body;
 
-    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
-      return NextResponse.json(
-        { error: 'Prompt is required and must be a non-empty string' },
-        { status: 400 }
-      );
+    if (!prompt?.trim()) {
+      return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    // Build enhanced prompt with style
-    const styleMap: Record<string, string> = {
-      realistic: 'photorealistic, highly detailed, professional photography',
-      artistic: 'artistic, creative, expressive, fine art style',
-      cinematic: 'cinematic, dramatic lighting, movie scene, epic composition',
-      anime: 'anime style, manga art, vibrant colors, Japanese animation',
-      '3d render': '3D render, CGI, octane render, unreal engine, highly detailed',
-      watercolor: 'watercolor painting, soft colors, artistic, fluid',
-      'oil painting': 'oil painting, classical art, rich colors, textured brushstrokes',
-      'digital art': 'digital art, modern illustration, vibrant, detailed',
-      sketch: 'pencil sketch, hand drawn, artistic, detailed linework',
-      'pixel art': 'pixel art, retro game style, 8-bit, nostalgic',
-    };
+    // Groq doesn't support image generation, so we return a placeholder
+    // In production, you would use services like:
+    // - OpenAI DALL-E
+    // - Stability AI
+    // - Midjourney API
+    // - Replicate
 
-    const styleEnhancement = styleMap[style.toLowerCase()] || styleMap.realistic;
-    const enhancedPrompt = `${prompt}, ${styleEnhancement}, high quality, detailed`;
+    const placeholderImageBase64 = generatePlaceholderImage(prompt, style);
 
-    const zai = await ZAI.create();
-
-    const response = await zai.images.generations.create({
-      prompt: enhancedPrompt,
-      size: size,
-    });
-
-    if (!response.data || !response.data[0] || !response.data[0].base64) {
-      throw new Error('Invalid response from image generation API');
-    }
-
-    const imageBase64 = response.data[0].base64;
-
-    return NextResponse.json({
-      success: true,
-      image: imageBase64,
-      prompt: prompt,
-      size: size,
-      style: style,
-      timestamp: new Date().toISOString(),
-    });
+    return new Response(JSON.stringify({ 
+      image: placeholderImageBase64,
+      prompt,
+      style,
+      note: "Image generation requires an image API (OpenAI DALL-E, Stability AI, etc.). This is a placeholder."
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
-    console.error('[Image Generate] Error:', error);
-    const message = error instanceof Error ? error.message : 'Image generation failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[Image Generate] Error:", error);
+    const message = error instanceof Error ? error.message : "Failed to generate image";
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
+}
+
+function generatePlaceholderImage(prompt: string, style: string): string {
+  // Create a simple SVG placeholder
+  const svg = `
+    <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#bg)"/>
+      <text x="50%" y="45%" text-anchor="middle" fill="#00e5ff" font-family="Arial" font-size="16" font-weight="bold">
+        ${style.toUpperCase()} STYLE
+      </text>
+      <text x="50%" y="55%" text-anchor="middle" fill="#90a8cc" font-family="Arial" font-size="12">
+        ${prompt.substring(0, 30)}${prompt.length > 30 ? '...' : ''}
+      </text>
+      <text x="50%" y="70%" text-anchor="middle" fill="#f59e0b" font-family="Arial" font-size="10">
+        Connect Image API for generation
+      </text>
+    </svg>
+  `;
+  
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 }

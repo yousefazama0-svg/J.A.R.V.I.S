@@ -48,3 +48,7 @@ upload/
 
 # Large files
 *.tar.gz
+
+# API Keys (never commit these)
+.env
+*.env.local

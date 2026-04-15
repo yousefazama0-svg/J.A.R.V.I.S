@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import ZAI from "z-ai-web-dev-sdk";
+import groq, { GROQ_MODELS } from "@/lib/groq";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -71,10 +71,9 @@ export async function POST(request: NextRequest) {
 
     const fullMessages: ChatMessage[] = [systemMessage, ...messages];
 
-    const zai = await ZAI.create();
-
     if (stream === false) {
-      const completion = await zai.chat.completions.create({
+      const completion = await groq.chat.completions.create({
+        model: GROQ_MODELS.chat,
         messages: fullMessages,
         temperature: 0.7,
         max_tokens: 4096,
@@ -85,7 +84,8 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ content, mode, timestamp: new Date().toISOString() }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
 
-    const sdkStream = await zai.chat.completions.create({
+    const sdkStream = await groq.chat.completions.create({
+      model: GROQ_MODELS.chat,
       messages: fullMessages,
       stream: true,
       temperature: 0.7,
@@ -96,43 +96,14 @@ export async function POST(request: NextRequest) {
 
     const readableStream = new ReadableStream({
       async start(controller) {
-        const reader = (sdkStream as ReadableStream<Uint8Array>).getReader();
-        const decoder = new TextDecoder();
-        let lineBuffer = "";
-
         try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunkText = decoder.decode(value, { stream: true });
-            lineBuffer += chunkText;
-
-            const lines = lineBuffer.split("\n");
-            lineBuffer = lines.pop() || "";
-
-            for (const line of lines) {
-              const trimmed = line.trim();
-              if (!trimmed.startsWith("data: ")) continue;
-
-              const data = trimmed.slice(6).trim();
-
-              if (data === "[DONE]") {
-                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-                return;
-              }
-
-              try {
-                const parsed = JSON.parse(data);
-                const content = parsed.choices?.[0]?.delta?.content || "";
-                if (content) {
-                  const ssePayload = JSON.stringify({ content });
-                  controller.enqueue(encoder.encode(`data: ${ssePayload}\n\n`));
-                }
-              } catch { /* Skip malformed */ }
+          for await (const chunk of sdkStream) {
+            const content = chunk.choices?.[0]?.delta?.content || "";
+            if (content) {
+              const ssePayload = JSON.stringify({ content });
+              controller.enqueue(encoder.encode(`data: ${ssePayload}\n\n`));
             }
           }
-
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         } catch (error) {
           console.error("[JARVIS Chat] Stream error:", error);
@@ -140,7 +111,6 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(`data: ${errMsg}\n\n`));
         } finally {
           controller.close();
-          reader.releaseLock();
         }
       },
     });
