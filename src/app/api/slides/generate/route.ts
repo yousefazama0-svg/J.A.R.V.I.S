@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getZAI } from "@/lib/zai";
+import { groqChatCompletion, isAIConfigured } from "@/lib/ai";
 
 interface Slide {
   title: string;
@@ -17,14 +17,22 @@ interface GenerateRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if API is configured
+    if (!isAIConfigured()) {
+      return new Response(JSON.stringify({ 
+        error: "API key not configured. Please add GROQ_API_KEY in Vercel Environment Variables." 
+      }), { 
+        status: 500, 
+        headers: { "Content-Type": "application/json" } 
+      });
+    }
+
     const body: GenerateRequest = await request.json();
     const { topic, slideCount, style, language } = body;
 
     if (!topic?.trim()) {
       return new Response(JSON.stringify({ error: "Topic is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
-
-    const zai = await getZAI();
 
     const systemPrompt = `You are an expert presentation designer. Create engaging, well-structured slides.
 Return ONLY valid JSON array of slides, no markdown formatting.`;
@@ -57,15 +65,14 @@ Return ONLY a JSON array in this exact format:
 
 First slide should be title-slide. Make it engaging and professional.`;
 
-    const completion = await zai.chat.completions.create({
+    const responseText = await groqChatCompletion({
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
-      thinking: { type: 'disabled' }
+      temperature: 0.7,
+      maxTokens: 4096
     });
-
-    const responseText = completion.choices?.[0]?.message?.content || "[]";
     
     // Extract JSON from response
     let slides: Slide[] = [];

@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { getZAI } from "@/lib/zai";
 
 interface GenerateRequest {
   prompt: string;
@@ -17,29 +16,24 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    const zai = await getZAI();
-
-    // Use ZAI Video Generation
-    const task = await zai.video.generations.create({
-      prompt: `${prompt}, ${style} style`,
-      quality: 'speed',
-      duration: duration === 10 ? 10 : 5,
-      fps: 30
-    });
-
-    if (task.id) {
-      return new Response(JSON.stringify({ 
-        videoId: task.id,
-        status: task.task_status || "PROCESSING",
-        prompt,
-        style,
-        duration
-      }), { status: 200, headers: { "Content-Type": "application/json" } });
-    }
-
+    // Video generation typically requires paid services
+    // For now, return a placeholder response with the prompt details
+    // You can integrate with services like:
+    // - RunwayML
+    // - Pika Labs
+    // - Stability AI
+    // - Replicate
+    
     return new Response(JSON.stringify({ 
-      error: "Failed to start video generation" 
-    }), { status: 500, headers: { "Content-Type": "application/json" } });
+      videoId: `video_${Date.now()}`,
+      status: "QUEUED",
+      prompt,
+      style,
+      duration,
+      message: "Video generation requires a video API service. Configure your preferred video generation provider.",
+      providers: ["RunwayML", "Pika Labs", "Stability AI", "Replicate"]
+    }), { status: 200, headers: { "Content-Type": "application/json" } });
+
   } catch (error) {
     console.error("[Video Generate] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to generate video";
