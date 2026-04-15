@@ -369,8 +369,18 @@ export default function GalleryView({ translations, language }: GalleryViewProps
             )}
             <div className="flex items-center gap-2 mt-1">
               {(lightboxItem.type === 'image' || lightboxItem.type === 'video') && (
-                <button onClick={() => { lightboxItem.type === 'image' ? downloadImage(lightboxItem) : downloadVideo(lightboxItem); }} className="jarvis-chip">
-                  <Download size={12} style={{ color: '#00e5ff' }} />{translations.download}
+                <button
+                  onClick={() => {
+                    if (lightboxItem.type === 'image') {
+                      downloadImage(lightboxItem);
+                    } else {
+                      downloadVideo(lightboxItem);
+                    }
+                  }}
+                  className="jarvis-chip"
+                >
+                  <Download size={12} style={{ color: '#00e5ff' }} />
+                  {translations.download}
                 </button>
               )}
               <button onClick={() => { deleteItem(lightboxItem.id); }} className="jarvis-chip" style={{ borderColor: 'rgba(239, 68, 68, 0.2)' }}>

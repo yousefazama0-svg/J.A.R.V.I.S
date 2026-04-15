@@ -338,7 +338,12 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
           </button>
         </div>
 
-        {error && <div className="jarvis-hud-card p-3 flex items-center gap-2" style={{ borderColor: 'rgba(239, 68, 68, 0.2)' }}><X size={12} style={{ color: '#ef4444' }} /><span className="text-[10px]" style={{ color: '#ef4444' }}>{error}</span></div>)}
+        {error && (
+          <div className="jarvis-hud-card p-3 flex items-center gap-2" style={{ borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+            <X size={12} style={{ color: '#ef4444' }} />
+            <span className="text-[10px]" style={{ color: '#ef4444' }}>{error}</span>
+          </div>
+        )}
         {isGenerating && renderSkeleton()}
 
         {slides.length > 0 && !isGenerating && (

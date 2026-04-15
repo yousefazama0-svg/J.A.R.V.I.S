@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect, useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, MicOff, Send, Loader2, Volume2, Type, Globe, Upload, Play, Pause, Square, X } from 'lucide-react';
 
 type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
