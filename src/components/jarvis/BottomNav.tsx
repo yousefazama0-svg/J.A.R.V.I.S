@@ -20,15 +20,16 @@ interface BottomNavProps {
   };
 }
 
-const tabs: { id: TabId; icon: React.ElementType }[] = [
-  { id: 'home', icon: Home },
-  { id: 'chat', icon: MessageSquare },
-  { id: 'voice', icon: Mic },
-  { id: 'photo', icon: Camera },
-  { id: 'video', icon: Video },
-  { id: 'slides', icon: Presentation },
-  { id: 'gallery', icon: Images },
-  { id: 'settings', icon: Settings },
+// Tab configuration with icons and colors
+const TAB_CONFIG: { id: TabId; icon: React.ElementType; color: string }[] = [
+  { id: 'home', icon: Home, color: '#00e5ff' },
+  { id: 'chat', icon: MessageSquare, color: '#00e5ff' },
+  { id: 'photo', icon: Camera, color: '#7c5cff' },
+  { id: 'video', icon: Video, color: '#f59e0b' },
+  { id: 'voice', icon: Mic, color: '#0088cc' },
+  { id: 'slides', icon: Presentation, color: '#10b981' },
+  { id: 'gallery', icon: Images, color: '#a855f7' },
+  { id: 'settings', icon: Settings, color: '#90a8cc' },
 ];
 
 export default function BottomNav({ activeTab, onTabChange, translations }: BottomNavProps) {
@@ -46,31 +47,96 @@ export default function BottomNav({ activeTab, onTabChange, translations }: Bott
     return labels[id];
   };
 
+  const getTabConfig = (id: TabId) => TAB_CONFIG.find(t => t.id === id) || TAB_CONFIG[0];
+
   return (
-    <nav className="jarvis-bottom-nav fixed bottom-0 left-0 right-0 z-40 h-[52px] flex items-center justify-around px-1"
-      style={{ background: 'rgba(6, 10, 20, 0.95)', borderTop: '1px solid #0e1a3a', backdropFilter: 'blur(24px)' }}>
-      {tabs.map(tab => {
-        const isActive = activeTab === tab.id;
-        const Icon = tab.icon;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className="relative flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-all"
-          >
-            {/* Active indicator glow line */}
-            {isActive && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px]"
-                style={{ background: 'linear-gradient(90deg, transparent, #00f0ff, #7c5cff, transparent)', borderRadius: '0 0 4px 4px', boxShadow: '0 0 10px rgba(0, 240, 255, 0.4)' }} />
-            )}
-            <Icon size={16} style={{ color: isActive ? '#00e5ff' : '#90a8cc', transition: 'color 0.3s' }} />
-            <span className="text-[8px] tracking-wider uppercase"
-              style={{ color: isActive ? '#00e5ff' : '#90a8cc', transition: 'color 0.3s', fontSize: '7px' }}>
-              {getLabel(tab.id)}
-            </span>
-          </button>
-        );
-      })}
+    <nav 
+      className="fixed bottom-0 left-0 right-0 z-50 h-[72px] flex items-center px-2 safe-area-bottom"
+      style={{ 
+        background: 'linear-gradient(180deg, rgba(6, 10, 20, 0.95) 0%, rgba(6, 10, 20, 0.98) 100%)', 
+        borderTop: '1px solid rgba(0, 229, 255, 0.1)', 
+        backdropFilter: 'blur(24px)',
+      }}
+    >
+      <div className="flex items-center justify-around w-full max-w-lg mx-auto">
+        {TAB_CONFIG.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
+          const config = getTabConfig(tab.id);
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className="relative flex flex-col items-center justify-center w-12 h-16 gap-1 transition-all group"
+            >
+              {/* Active background glow */}
+              {isActive && (
+                <div 
+                  className="absolute inset-0 rounded-2xl transition-opacity"
+                  style={{
+                    background: `linear-gradient(180deg, ${config.color}15, transparent)`,
+                    boxShadow: `inset 0 1px 0 ${config.color}20`,
+                  }}
+                />
+              )}
+              
+              {/* Top indicator */}
+              <div 
+                className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full transition-all"
+                style={{
+                  background: isActive ? `linear-gradient(90deg, transparent, ${config.color}, transparent)` : 'transparent',
+                  boxShadow: isActive ? `0 0 12px ${config.color}50` : 'none',
+                  opacity: isActive ? 1 : 0,
+                }}
+              />
+              
+              {/* Icon */}
+              <div 
+                className="relative z-10 flex items-center justify-center w-8 h-8 rounded-xl transition-all"
+                style={{
+                  background: isActive ? `${config.color}15` : 'transparent',
+                  border: isActive ? `1px solid ${config.color}25` : '1px solid transparent',
+                  boxShadow: isActive ? `0 0 16px ${config.color}20` : 'none',
+                }}
+              >
+                <Icon 
+                  size={18} 
+                  style={{ 
+                    color: isActive ? config.color : 'rgba(144, 168, 204, 0.6)',
+                    transition: 'color 0.3s',
+                  }} 
+                />
+              </div>
+              
+              {/* Label */}
+              <span 
+                className="relative z-10 text-[8px] tracking-wider uppercase font-medium transition-all"
+                style={{ 
+                  color: isActive ? config.color : 'rgba(144, 168, 204, 0.5)',
+                }}
+              >
+                {getLabel(tab.id)}
+              </span>
+              
+              {/* Hover effect */}
+              <div 
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{
+                  background: `${config.color}08`,
+                }}
+              />
+            </button>
+          );
+        })}
+      </div>
+      
+      {/* Bottom safe area for iOS */}
+      <style jsx global>{`
+        .safe-area-bottom {
+          padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+      `}</style>
     </nav>
   );
 }

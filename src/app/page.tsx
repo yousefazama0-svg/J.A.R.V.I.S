@@ -9,12 +9,14 @@ import {
   Presentation,
   Images,
   Settings,
-  Sparkles,
-  Menu,
-  X,
+  Globe,
+  User,
+  LogOut,
+  ChevronRight,
 } from 'lucide-react';
 
 // Import all view components
+import HomeView from '@/components/jarvis/HomeView';
 import ChatView from '@/components/jarvis/ChatView';
 import PhotoView from '@/components/jarvis/PhotoView';
 import VideoView from '@/components/jarvis/VideoView';
@@ -23,30 +25,66 @@ import SlidesView from '@/components/jarvis/SlidesView';
 import GalleryView from '@/components/jarvis/GalleryView';
 import SettingsView from '@/components/jarvis/SettingsView';
 import BackgroundEffects from '@/components/jarvis/BackgroundEffects';
-import ReactorCore from '@/components/jarvis/ReactorCore';
+import BottomNav, { TabId } from '@/components/jarvis/BottomNav';
+import ArcReactorLogo from '@/components/jarvis/ArcReactorLogo';
+import LoginView from '@/components/jarvis/LoginView';
 
-type Tab = 'chat' | 'photo' | 'video' | 'voice' | 'slides' | 'gallery' | 'settings';
+type Tab = TabId;
 type Language = 'en' | 'ar';
+
+interface UserProfile {
+  name: string;
+  email: string;
+}
 
 // Translation system
 const TRANSLATIONS: Record<Language, Record<string, string>> = {
   en: {
     // Navigation
+    home: 'Home',
     aiChat: 'AI Chat',
     photoStudio: 'Photo Studio',
     videoEngine: 'Video Engine',
-    voiceAssistant: 'Voice Assistant',
-    slidesBuilder: 'Slides Builder',
-    mediaGallery: 'Media Gallery',
+    voiceAssistant: 'Voice',
+    slidesBuilder: 'Slides',
+    mediaGallery: 'Gallery',
     settings: 'Settings',
 
-    // Chat
-    messages: 'messages',
+    // Header
+    system: 'System',
+    voice: 'Voice',
+    online: 'Online',
     live: 'LIVE',
-    exportChat: 'Export Chat',
-    clearChat: 'Clear Chat',
+    
+    // Auth
+    welcomeBack: 'Welcome Back',
+    loginToContinue: 'Sign in to continue to JARVIS',
+    email: 'Email',
+    password: 'Password',
+    signIn: 'Sign In',
+    signUp: 'Sign Up',
+    noAccount: "Don't have an account?",
+    hasAccount: 'Already have an account?',
+    name: 'Name',
+    createAccount: 'Create Account',
+    orContinueAs: 'or continue as',
+    guest: 'Guest',
+    loggingIn: 'Signing in...',
+    loginSuccess: 'Login successful!',
+    loginError: 'Invalid credentials. Please try again.',
+    forgotPassword: 'Forgot password?',
+    
+    // Home
     welcomeToJarvis: 'Welcome to JARVIS',
     welcomeSub: 'Your AI-powered creative assistant',
+    quickActions: 'Quick Actions',
+    systemStatus: 'System Status',
+    capabilities: 'Capabilities',
+    
+    // Chat
+    messages: 'messages',
+    exportChat: 'Export Chat',
+    clearChat: 'Clear Chat',
     generateImage: 'Generate Image',
     createVideo: 'Create Video',
     buildSlides: 'Build Slides',
@@ -200,7 +238,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     clearGallery: 'Clear Gallery',
     exportSettings: 'Export Settings',
     resetAll: 'Reset All',
-    online: 'Online',
     busy: 'Busy',
     away: 'Away',
     image: 'Image',
@@ -208,21 +245,50 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
   },
   ar: {
     // Navigation
-    aiChat: 'المحادثة الذكية',
-    photoStudio: 'استوديو الصور',
-    videoEngine: 'محرك الفيديو',
-    voiceAssistant: 'المساعد الصوتي',
-    slidesBuilder: 'منشئ العروض',
-    mediaGallery: 'معرض الوسائط',
+    home: 'الرئيسية',
+    aiChat: 'المحادثة',
+    photoStudio: 'الصور',
+    videoEngine: 'الفيديو',
+    voiceAssistant: 'الصوت',
+    slidesBuilder: 'العروض',
+    mediaGallery: 'المعرض',
     settings: 'الإعدادات',
 
-    // Chat
-    messages: 'رسائل',
+    // Header
+    system: 'النظام',
+    voice: 'الصوت',
+    online: 'متصل',
     live: 'مباشر',
-    exportChat: 'تصدير المحادثة',
-    clearChat: 'مسح المحادثة',
+    
+    // Auth
+    welcomeBack: 'مرحباً بعودتك',
+    loginToContinue: 'سجل الدخول للمتابعة',
+    email: 'البريد الإلكتروني',
+    password: 'كلمة المرور',
+    signIn: 'تسجيل الدخول',
+    signUp: 'إنشاء حساب',
+    noAccount: 'ليس لديك حساب؟',
+    hasAccount: 'لديك حساب بالفعل؟',
+    name: 'الاسم',
+    createAccount: 'إنشاء حساب',
+    orContinueAs: 'أو المتابعة كـ',
+    guest: 'زائر',
+    loggingIn: 'جارٍ تسجيل الدخول...',
+    loginSuccess: 'تم تسجيل الدخول بنجاح!',
+    loginError: 'بيانات الدخول غير صحيحة. يرجى المحاولة مرة أخرى.',
+    forgotPassword: 'نسيت كلمة المرور؟',
+    
+    // Home
     welcomeToJarvis: 'مرحباً بك في JARVIS',
     welcomeSub: 'مساعدك الإبداعي المدعوم بالذكاء الاصطناعي',
+    quickActions: 'إجراءات سريعة',
+    systemStatus: 'حالة النظام',
+    capabilities: 'القدرات',
+    
+    // Chat
+    messages: 'رسائل',
+    exportChat: 'تصدير المحادثة',
+    clearChat: 'مسح المحادثة',
     generateImage: 'إنشاء صورة',
     createVideo: 'إنشاء فيديو',
     buildSlides: 'بناء عرض تقديمي',
@@ -376,7 +442,6 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     clearGallery: 'مسح المعرض',
     exportSettings: 'تصدير الإعدادات',
     resetAll: 'إعادة تعيين الكل',
-    online: 'متصل',
     busy: 'مشغول',
     away: 'بعيد',
     image: 'صورة',
@@ -384,20 +449,12 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
   },
 };
 
-// Navigation tabs configuration
-const NAV_TABS: { id: Tab; icon: React.ElementType; color: string }[] = [
-  { id: 'chat', icon: MessageSquare, color: '#00e5ff' },
-  { id: 'photo', icon: Camera, color: '#00e5ff' },
-  { id: 'video', icon: Video, color: '#7c5cff' },
-  { id: 'voice', icon: Mic, color: '#0088cc' },
-  { id: 'slides', icon: Presentation, color: '#f59e0b' },
-  { id: 'gallery', icon: Images, color: '#10b981' },
-  { id: 'settings', icon: Settings, color: '#90a8cc' },
-];
-
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<Tab>('chat');
-  // Initialize language from localStorage on first render
+  const [activeTab, setActiveTab] = useState<Tab>('home');
+  const [prevTab, setPrevTab] = useState<Tab>('home');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Initialize language from localStorage
   const [language, setLanguage] = useState<Language>(() => {
     if (typeof window === 'undefined') return 'en';
     try {
@@ -406,7 +463,19 @@ export default function Home() {
     } catch { /* ignore */ }
     return 'en';
   });
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // User state
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const saved = localStorage.getItem('jarvis-user');
+      if (saved) return JSON.parse(saved);
+    } catch { /* ignore */ }
+    return null;
+  });
+  const [showLogin, setShowLogin] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
   const [navigationData, setNavigationData] = useState<{ prompt?: string; topic?: string } | undefined>();
 
   const t = TRANSLATIONS[language];
@@ -419,12 +488,46 @@ export default function Home() {
     } catch { /* ignore */ }
   }, []);
 
+  // Handle login
+  const handleLogin = useCallback((profile: UserProfile) => {
+    setUser(profile);
+    try {
+      localStorage.setItem('jarvis-user', JSON.stringify(profile));
+    } catch { /* ignore */ }
+  }, []);
+
+  // Handle logout
+  const handleLogout = useCallback(() => {
+    setUser(null);
+    setShowUserMenu(false);
+    try {
+      localStorage.removeItem('jarvis-user');
+    } catch { /* ignore */ }
+  }, []);
+
   // Handle navigation with data
   const handleNavigate = useCallback((tab: string, data?: { prompt?: string; topic?: string }) => {
-    setActiveTab(tab as Tab);
-    setNavigationData(data);
-    setIsMobileMenuOpen(false);
-  }, []);
+    setPrevTab(activeTab);
+    setIsTransitioning(true);
+    
+    setTimeout(() => {
+      setActiveTab(tab as Tab);
+      setNavigationData(data);
+      setIsTransitioning(false);
+    }, 150);
+  }, [activeTab]);
+
+  // Handle tab change with animation
+  const handleTabChange = useCallback((tab: Tab) => {
+    if (tab === activeTab) return;
+    setPrevTab(activeTab);
+    setIsTransitioning(true);
+    
+    setTimeout(() => {
+      setActiveTab(tab);
+      setIsTransitioning(false);
+    }, 150);
+  }, [activeTab]);
 
   // Clear navigation data after use
   useEffect(() => {
@@ -436,258 +539,298 @@ export default function Home() {
 
   // Render current view
   const renderView = () => {
+    const viewClass = `flex-1 flex flex-col ${isTransitioning ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'} transition-all duration-300 ease-out`;
+
     switch (activeTab) {
+      case 'home':
+        return (
+          <div className={viewClass}>
+            <HomeView
+              onNavigate={handleNavigate}
+              translations={{
+                welcomeToJarvis: t.welcomeToJarvis,
+                welcomeSub: t.welcomeSub,
+                aiChat: t.aiChat,
+                photoStudio: t.photoStudio,
+                videoEngine: t.videoEngine,
+                voiceAssistant: t.voiceAssistant,
+                slidesBuilder: t.slidesBuilder,
+                mediaGallery: t.mediaGallery,
+                settings: t.settings,
+                quickActions: t.quickActions,
+                systemStatus: t.systemStatus,
+                online: t.online,
+                capabilities: t.capabilities,
+              }}
+              language={language}
+            />
+          </div>
+        );
       case 'chat':
         return (
-          <ChatView
-            onNavigate={handleNavigate}
-            translations={{
-              aiChat: t.aiChat,
-              messages: t.messages,
-              live: t.live,
-              exportChat: t.exportChat,
-              clearChat: t.clearChat,
-              welcomeToJarvis: t.welcomeToJarvis,
-              welcomeSub: t.welcomeSub,
-              generateImage: t.generateImage,
-              createVideo: t.createVideo,
-              buildSlides: t.buildSlides,
-              explainCode: t.explainCode,
-              placeholder: t.placeholder,
-              you: t.you,
-              jarvis: t.jarvis,
-              thinking: t.thinking,
-              commands: { image: t.commandsImage, video: t.commandsVideo, slides: t.commandsSlides },
-            }}
-            language={language}
-          />
+          <div className={viewClass}>
+            <ChatView
+              onNavigate={handleNavigate}
+              translations={{
+                aiChat: t.aiChat,
+                messages: t.messages,
+                live: t.live,
+                exportChat: t.exportChat,
+                clearChat: t.clearChat,
+                welcomeToJarvis: t.welcomeToJarvis,
+                welcomeSub: t.welcomeSub,
+                generateImage: t.generateImage,
+                createVideo: t.createVideo,
+                buildSlides: t.buildSlides,
+                explainCode: t.explainCode,
+                placeholder: t.placeholder,
+                you: t.you,
+                jarvis: t.jarvis,
+                thinking: t.thinking,
+                commands: { image: t.commandsImage, video: t.commandsVideo, slides: t.commandsSlides },
+              }}
+              language={language}
+            />
+          </div>
         );
       case 'photo':
         return (
-          <PhotoView
-            initialPrompt={navigationData?.prompt}
-            translations={{
-              photoStudio: t.photoStudio,
-              aiImageGeneration: t.aiImageGeneration,
-              live: t.live,
-              prompt: t.prompt,
-              size: t.size,
-              style: t.style,
-              generate: t.generate,
-              generating: t.generating,
-              recentPrompts: t.recentPrompts,
-              generated: t.generated,
-              noImagesYet: t.noImagesYet,
-              noImagesSub: t.noImagesSub,
-              generateMode: t.generateMode,
-              enhanceMode: t.enhanceMode,
-              enhanceImage: t.enhanceImage,
-              enhanceImageSub: t.enhanceImageSub,
-              uploadImage: t.uploadImage,
-              selectImageToEnhance: t.selectImageToEnhance,
-              quality: t.quality,
-              sharpness: t.sharpness,
-              denoise: t.denoise,
-              colorCorrection: t.colorCorrection,
-              upscaling: t.upscaling,
-              low: t.low,
-              medium: t.medium,
-              high: t.high,
-              ultra: t.ultra,
-              enhance: t.enhance,
-              enhancing: t.enhancing,
-              downloadAll: t.downloadAll,
-              png: t.png,
-              jpg: t.jpg,
-              webp: t.webp,
-            }}
-            language={language}
-          />
+          <div className={viewClass}>
+            <PhotoView
+              initialPrompt={navigationData?.prompt}
+              translations={{
+                photoStudio: t.photoStudio,
+                aiImageGeneration: t.aiImageGeneration,
+                live: t.live,
+                prompt: t.prompt,
+                size: t.size,
+                style: t.style,
+                generate: t.generate,
+                generating: t.generating,
+                recentPrompts: t.recentPrompts,
+                generated: t.generated,
+                noImagesYet: t.noImagesYet,
+                noImagesSub: t.noImagesSub,
+                generateMode: t.generateMode,
+                enhanceMode: t.enhanceMode,
+                enhanceImage: t.enhanceImage,
+                enhanceImageSub: t.enhanceImageSub,
+                uploadImage: t.uploadImage,
+                selectImageToEnhance: t.selectImageToEnhance,
+                quality: t.quality,
+                sharpness: t.sharpness,
+                denoise: t.denoise,
+                colorCorrection: t.colorCorrection,
+                upscaling: t.upscaling,
+                low: t.low,
+                medium: t.medium,
+                high: t.high,
+                ultra: t.ultra,
+                enhance: t.enhance,
+                enhancing: t.enhancing,
+                downloadAll: t.downloadAll,
+                png: t.png,
+                jpg: t.jpg,
+                webp: t.webp,
+              }}
+              language={language}
+            />
+          </div>
         );
       case 'video':
         return (
-          <VideoView
-            initialPrompt={navigationData?.prompt}
-            translations={{
-              videoEngine: t.videoEngine,
-              aiVideoGeneration: t.aiVideoGeneration,
-              live: t.live,
-              prompt: t.prompt,
-              duration: t.duration,
-              style: t.style,
-              generateVideo: t.generateVideo,
-              generatingVideo: t.generatingVideo,
-              generated: t.generated,
-              noVideosYet: t.noVideosYet,
-              noVideosSub: t.noVideosSub,
-              generateMode: t.generateMode,
-              enhanceMode: t.enhanceMode,
-              enhanceVideo: t.enhanceVideo,
-              enhanceVideoSub: t.enhanceVideoSub,
-              uploadVideo: t.uploadVideo,
-              quality: t.quality,
-              low: t.low,
-              medium: t.medium,
-              high: t.high,
-              ultra: t.ultra,
-              enhance: t.enhance,
-              enhancing: t.enhancing,
-              downloadAll: t.downloadAll,
-              mp4: t.mp4,
-              webm: t.webm,
-              avi: t.avi,
-              mov: t.mov,
-              processing: t.processing,
-              mayTakeMinutes: t.mayTakeMinutes,
-              fps: t.fps,
-              resolution: t.resolution,
-              speed: t.speed,
-              stabilize: t.stabilize,
-              colorGrade: t.colorGrade,
-            }}
-            language={language}
-          />
+          <div className={viewClass}>
+            <VideoView
+              initialPrompt={navigationData?.prompt}
+              translations={{
+                videoEngine: t.videoEngine,
+                aiVideoGeneration: t.aiVideoGeneration,
+                live: t.live,
+                prompt: t.prompt,
+                duration: t.duration,
+                style: t.style,
+                generateVideo: t.generateVideo,
+                generatingVideo: t.generatingVideo,
+                generated: t.generated,
+                noVideosYet: t.noVideosYet,
+                noVideosSub: t.noVideosSub,
+                generateMode: t.generateMode,
+                enhanceMode: t.enhanceMode,
+                enhanceVideo: t.enhanceVideo,
+                enhanceVideoSub: t.enhanceVideoSub,
+                uploadVideo: t.uploadVideo,
+                quality: t.quality,
+                low: t.low,
+                medium: t.medium,
+                high: t.high,
+                ultra: t.ultra,
+                enhance: t.enhance,
+                enhancing: t.enhancing,
+                downloadAll: t.downloadAll,
+                mp4: t.mp4,
+                webm: t.webm,
+                avi: t.avi,
+                mov: t.mov,
+                processing: t.processing,
+                mayTakeMinutes: t.mayTakeMinutes,
+                fps: t.fps,
+                resolution: t.resolution,
+                speed: t.speed,
+                stabilize: t.stabilize,
+                colorGrade: t.colorGrade,
+              }}
+              language={language}
+            />
+          </div>
         );
       case 'voice':
         return (
-          <VoiceView
-            translations={{
-              voiceAssistant: t.voiceAssistant,
-              naturalLanguageSpeech: t.naturalLanguageSpeech,
-              live: t.live,
-              ready: t.ready,
-              listening: t.listening,
-              thinking: t.thinking,
-              speaking: t.speaking,
-              voiceError: t.voiceError,
-              tapToStart: t.tapToStart,
-              listeningForVoice: t.listeningForVoice,
-              processingRequest: t.processingRequest,
-              jarvisSpeaking: t.jarvisSpeaking,
-              voiceErrorOccurred: t.voiceErrorOccurred,
-              transcription: t.transcription,
-              typeInstead: t.typeInstead,
-              hideTextInput: t.hideTextInput,
-              typeMessage: t.typeMessage,
-              conversationHistory: t.conversationHistory,
-              uploadAudio: t.uploadAudio,
-              selectVoice: t.selectVoice,
-              speed: t.speed,
-              volume: t.volume,
-            }}
-            language={language}
-          />
+          <div className={viewClass}>
+            <VoiceView
+              translations={{
+                voiceAssistant: t.voiceAssistant,
+                naturalLanguageSpeech: t.naturalLanguageSpeech,
+                live: t.live,
+                ready: t.ready,
+                listening: t.listening,
+                thinking: t.thinking,
+                speaking: t.jarvisSpeaking,
+                voiceError: t.voiceError,
+                tapToStart: t.tapToStart,
+                listeningForVoice: t.listeningForVoice,
+                processingRequest: t.processingRequest,
+                jarvisSpeaking: t.jarvisSpeaking,
+                voiceErrorOccurred: t.voiceErrorOccurred,
+                transcription: t.transcription,
+                typeInstead: t.typeInstead,
+                hideTextInput: t.hideTextInput,
+                typeMessage: t.typeMessage,
+                conversationHistory: t.conversationHistory,
+                uploadAudio: t.uploadAudio,
+                selectVoice: t.selectVoice,
+                speed: t.speed,
+                volume: t.volume,
+              }}
+              language={language}
+            />
+          </div>
         );
       case 'slides':
         return (
-          <SlidesView
-            initialTopic={navigationData?.topic}
-            translations={{
-              slidesBuilder: t.slidesBuilder,
-              aiPresentationCreator: t.aiPresentationCreator,
-              live: t.live,
-              topic: t.topic,
-              slides: t.slides,
-              style: t.style,
-              buildPresentation: t.buildPresentation,
-              buildingPresentation: t.buildingPresentation,
-              generated: t.generated,
-              noPresentationsYet: t.noPresentationsYet,
-              noPresentationsSub: t.noPresentationsSub,
-              preview: t.preview,
-              export: t.export,
-              copyAll: t.copyAll,
-              copied: t.copied,
-              speakerNotes: t.speakerNotes,
-              slidesGenerated: t.slidesGenerated,
-            }}
-            language={language}
-          />
+          <div className={viewClass}>
+            <SlidesView
+              initialTopic={navigationData?.topic}
+              translations={{
+                slidesBuilder: t.slidesBuilder,
+                aiPresentationCreator: t.aiPresentationCreator,
+                live: t.live,
+                topic: t.topic,
+                slides: t.slides,
+                style: t.style,
+                buildPresentation: t.buildPresentation,
+                buildingPresentation: t.buildingPresentation,
+                generated: t.generated,
+                noPresentationsYet: t.noPresentationsYet,
+                noPresentationsSub: t.noPresentationsSub,
+                preview: t.preview,
+                export: t.export,
+                copyAll: t.copyAll,
+                copied: t.copied,
+                speakerNotes: t.speakerNotes,
+                slidesGenerated: t.slidesGenerated,
+              }}
+              language={language}
+            />
+          </div>
         );
       case 'gallery':
         return (
-          <GalleryView
-            translations={{
-              mediaGallery: t.mediaGallery,
-              itemsTotal: t.itemsTotal,
-              newest: t.newest,
-              oldest: t.oldest,
-              searchPrompt: t.searchPrompt,
-              selected: t.selected,
-              deleteSelected: t.deleteSelected,
-              yourGalleryEmpty: t.yourGalleryEmpty,
-              yourGallerySub: t.yourGallerySub,
-              noImagesYet: t.noImagesYet,
-              noImagesSub: t.noImagesSub,
-              noVideosYet: t.noVideosYet,
-              noVideosSub: t.noVideosSub,
-              noPresentationsYet: t.noPresentationsYet,
-              noPresentationsSub: t.noPresentationsSub,
-              download: t.download,
-              delete: t.delete,
-              png: t.png,
-              jpg: t.jpg,
-              webp: t.webp,
-              mp4: t.mp4,
-              webm: t.webm,
-              mov: t.mov,
-            }}
-            language={language}
-          />
+          <div className={viewClass}>
+            <GalleryView
+              translations={{
+                mediaGallery: t.mediaGallery,
+                itemsTotal: t.itemsTotal,
+                newest: t.newest,
+                oldest: t.oldest,
+                searchPrompt: t.searchPrompt,
+                selected: t.selected,
+                deleteSelected: t.deleteSelected,
+                yourGalleryEmpty: t.yourGalleryEmpty,
+                yourGallerySub: t.yourGallerySub,
+                noImagesYet: t.noImagesYet,
+                noImagesSub: t.noImagesSub,
+                noVideosYet: t.noVideosYet,
+                noVideosSub: t.noVideosSub,
+                noPresentationsYet: t.noPresentationsYet,
+                noPresentationsSub: t.noPresentationsSub,
+                download: t.download,
+                delete: t.delete,
+                png: t.png,
+                jpg: t.jpg,
+                webp: t.webp,
+                mp4: t.mp4,
+                webm: t.webm,
+                mov: t.mov,
+              }}
+              language={language}
+            />
+          </div>
         );
       case 'settings':
         return (
-          <SettingsView
-            translations={{
-              systemConfig: t.systemConfig,
-              jarvisConfigurationPanel: t.jarvisConfigurationPanel,
-              profile: t.profile,
-              aiConfiguration: t.aiConfiguration,
-              voiceConfiguration: t.voiceConfiguration,
-              mediaDefaults: t.mediaDefaults,
-              display: t.display,
-              systemInfo: t.systemInfo,
-              dataManagement: t.dataManagement,
-              aboutJarvis: t.aboutJarvis,
-              aboutJarvisText: t.aboutJarvisText,
-              poweredByZAI: t.poweredByZAI,
-              version: t.version,
-              sdkStatus: t.sdkStatus,
-              connected: t.connected,
-              storageUsed: t.storageUsed,
-              defaultLanguage: t.defaultLanguage,
-              english: t.english,
-              arabic: t.arabic,
-              responseStyle: t.responseStyle,
-              concise: t.concise,
-              detailed: t.detailed,
-              creative: t.creative,
-              autoSpeakResponses: t.autoSpeakResponses,
-              imageQuality: t.imageQuality,
-              standard: t.standard,
-              hd: t.hd,
-              defaultImageSize: t.defaultImageSize,
-              defaultVideoDuration: t.defaultVideoDuration,
-              speed: t.speed,
-              volume: t.volume,
-              selectVoice: t.selectVoice,
-              image: t.image,
-              video: t.video,
-              particleEffects: t.particleEffects,
-              animations: t.animations,
-              compactMode: t.compactMode,
-              darkMode: t.darkMode,
-              clearChat: t.clearChat,
-              clearGallery: t.clearGallery,
-              exportSettings: t.exportSettings,
-              resetAll: t.resetAll,
-              online: t.online,
-              busy: t.busy,
-              away: t.away,
-            }}
-            language={language}
-            onLanguageChange={handleLanguageChange}
-          />
+          <div className={viewClass}>
+            <SettingsView
+              translations={{
+                systemConfig: t.systemConfig,
+                jarvisConfigurationPanel: t.jarvisConfigurationPanel,
+                profile: t.profile,
+                aiConfiguration: t.aiConfiguration,
+                voiceConfiguration: t.voiceConfiguration,
+                mediaDefaults: t.mediaDefaults,
+                display: t.display,
+                systemInfo: t.systemInfo,
+                dataManagement: t.dataManagement,
+                aboutJarvis: t.aboutJarvis,
+                aboutJarvisText: t.aboutJarvisText,
+                poweredByZAI: t.poweredByZAI,
+                version: t.version,
+                sdkStatus: t.sdkStatus,
+                connected: t.connected,
+                storageUsed: t.storageUsed,
+                defaultLanguage: t.defaultLanguage,
+                english: t.english,
+                arabic: t.arabic,
+                responseStyle: t.responseStyle,
+                concise: t.concise,
+                detailed: t.detailed,
+                creative: t.creative,
+                autoSpeakResponses: t.autoSpeakResponses,
+                imageQuality: t.imageQuality,
+                standard: t.standard,
+                hd: t.hd,
+                defaultImageSize: t.defaultImageSize,
+                defaultVideoDuration: t.defaultVideoDuration,
+                speed: t.speed,
+                volume: t.volume,
+                selectVoice: t.selectVoice,
+                image: t.image,
+                video: t.video,
+                particleEffects: t.particleEffects,
+                animations: t.animations,
+                compactMode: t.compactMode,
+                darkMode: t.darkMode,
+                clearChat: t.clearChat,
+                clearGallery: t.clearGallery,
+                exportSettings: t.exportSettings,
+                resetAll: t.resetAll,
+                online: t.online,
+                busy: t.busy,
+                away: t.away,
+              }}
+              language={language}
+              onLanguageChange={handleLanguageChange}
+            />
+          </div>
         );
       default:
         return null;
@@ -699,136 +842,162 @@ export default function Home() {
       {/* Background Effects */}
       <BackgroundEffects />
       
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex fixed left-0 top-0 bottom-0 w-16 flex-col items-center py-4 z-30" style={{ background: 'rgba(8, 14, 30, 0.95)', borderRight: '1px solid #0e1a3a' }}>
-        {/* Logo */}
-        <div className="mb-6">
-          <div className="w-10 h-10 flex items-center justify-center rounded-xl" style={{ background: 'linear-gradient(135deg, #00e5ff20, #7c5cff20)', border: '1px solid #00e5ff30' }}>
-            <Sparkles size={20} style={{ color: '#00e5ff' }} />
+      {/* Top Bar */}
+      <header 
+        className="fixed top-0 left-0 right-0 z-40 h-[52px] flex items-center justify-between px-4"
+        style={{ 
+          background: 'rgba(6, 10, 20, 0.95)', 
+          borderBottom: '1px solid rgba(0, 229, 255, 0.1)', 
+          backdropFilter: 'blur(24px)' 
+        }}
+      >
+        {/* Logo & Title */}
+        <div className="flex items-center gap-3">
+          <ArcReactorLogo size={32} />
+          <div>
+            <span className="jarvis-text-shimmer text-sm font-black tracking-[0.15em]">J.A.R.V.I.S</span>
+            <p className="text-[7px] tracking-widest uppercase hidden sm:block" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+              {language === 'ar' ? 'نظام ذكاء اصطناعي' : 'AI System'}
+            </p>
           </div>
         </div>
 
-        {/* Navigation */}
-        <div className="flex-1 flex flex-col items-center gap-2">
-          {NAV_TABS.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
+        {/* Right side */}
+        <div className="flex items-center gap-2">
+          {/* Language Toggle */}
+          <button
+            onClick={() => handleLanguageChange(language === 'en' ? 'ar' : 'en')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all hover:bg-[#0e1a3a]/50"
+            style={{ border: '1px solid rgba(0, 229, 255, 0.1)' }}
+          >
+            <Globe size={14} style={{ color: '#00e5ff' }} />
+            <span className="text-[10px] tracking-widest uppercase font-medium" style={{ color: '#90a8cc' }}>
+              {language === 'en' ? 'EN' : 'AR'}
+            </span>
+          </button>
+
+          {/* User Menu or Login */}
+          {user ? (
+            <div className="relative">
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300"
-                style={{
-                  background: isActive ? `${tab.color}15` : 'transparent',
-                  border: `1px solid ${isActive ? `${tab.color}30` : 'transparent'}`,
-                  boxShadow: isActive ? `0 0 15px ${tab.color}20` : 'none',
-                }}
-                title={t[tab.id === 'chat' ? 'aiChat' : tab.id === 'photo' ? 'photoStudio' : tab.id === 'video' ? 'videoEngine' : tab.id === 'voice' ? 'voiceAssistant' : tab.id === 'slides' ? 'slidesBuilder' : tab.id === 'gallery' ? 'mediaGallery' : 'settings']}
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:bg-[#0e1a3a]/50"
+                style={{ border: '1px solid rgba(0, 229, 255, 0.1)' }}
               >
-                <Icon size={18} style={{ color: isActive ? tab.color : '#90a8cc' }} />
+                <div 
+                  className="w-6 h-6 rounded-full flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg, #00e5ff20, #7c5cff20)', border: '1px solid rgba(0, 229, 255, 0.2)' }}
+                >
+                  <User size={12} style={{ color: '#00e5ff' }} />
+                </div>
+                <span className="text-[10px] tracking-wider font-medium hidden sm:block" style={{ color: '#d0e4f8' }}>
+                  {user.name}
+                </span>
               </button>
-            );
-          })}
-        </div>
-
-        {/* Language Toggle */}
-        <button
-          onClick={() => handleLanguageChange(language === 'en' ? 'ar' : 'en')}
-          className="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 mb-2"
-          style={{ background: 'rgba(0, 229, 255, 0.06)', border: '1px solid rgba(0, 229, 255, 0.12)' }}
-          title={language === 'en' ? 'العربية' : 'English'}
-        >
-          <span className="text-[10px] font-bold" style={{ color: '#00e5ff' }}>
-            {language === 'en' ? 'AR' : 'EN'}
-          </span>
-        </button>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 md:ml-16 flex flex-col relative z-10">
-        {/* Mobile Top Bar */}
-        <div className="md:hidden fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-3 z-30" style={{ background: 'rgba(8, 14, 30, 0.95)', borderBottom: '1px solid #0e1a3a', backdropFilter: 'blur(20px)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 flex items-center justify-center rounded-lg" style={{ background: 'linear-gradient(135deg, #00e5ff20, #7c5cff20)', border: '1px solid #00e5ff30' }}>
-              <Sparkles size={16} style={{ color: '#00e5ff' }} />
-            </div>
-            <span className="text-[12px] font-bold tracking-widest uppercase jarvis-text-shimmer">JARVIS</span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleLanguageChange(language === 'en' ? 'ar' : 'en')}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
-              style={{ background: 'rgba(0, 229, 255, 0.06)', border: '1px solid rgba(0, 229, 255, 0.12)' }}
-            >
-              <span className="text-[9px] font-bold" style={{ color: '#00e5ff' }}>
-                {language === 'en' ? 'AR' : 'EN'}
-              </span>
-            </button>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
-              style={{ background: 'rgba(0, 229, 255, 0.06)', border: '1px solid rgba(0, 229, 255, 0.12)' }}
-            >
-              {isMobileMenuOpen ? <X size={18} style={{ color: '#00e5ff' }} /> : <Menu size={18} style={{ color: '#00e5ff' }} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden fixed top-[52px] left-0 right-0 z-30 p-3 jarvis-animate-fade-in" style={{ background: 'rgba(8, 14, 30, 0.98)', borderBottom: '1px solid #0e1a3a', backdropFilter: 'blur(20px)' }}>
-            <div className="grid grid-cols-4 gap-2">
-              {NAV_TABS.map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
+              
+              {/* Dropdown */}
+              {showUserMenu && (
+                <div 
+                  className="absolute top-full right-0 mt-2 w-48 rounded-xl overflow-hidden jarvis-animate-fade-in"
+                  style={{ background: '#080e1e', border: '1px solid #0e1a3a', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' }}
+                >
+                  <div className="p-3" style={{ borderBottom: '1px solid #0e1a3a' }}>
+                    <p className="text-[11px] font-medium" style={{ color: '#d0e4f8' }}>{user.name}</p>
+                    <p className="text-[9px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{user.email}</p>
+                  </div>
                   <button
-                    key={tab.id}
-                    onClick={() => { setActiveTab(tab.id); setIsMobileMenuOpen(false); }}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all"
-                    style={{
-                      background: isActive ? `${tab.color}10` : 'transparent',
-                      border: `1px solid ${isActive ? `${tab.color}25` : 'transparent'}`,
-                    }}
+                    onClick={() => { handleNavigate('settings'); setShowUserMenu(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-[#0e1a3a]/50"
                   >
-                    <Icon size={18} style={{ color: isActive ? tab.color : '#90a8cc' }} />
-                    <span className="text-[8px] uppercase tracking-wider" style={{ color: isActive ? tab.color : '#90a8cc' }}>
-                      {tab.id}
+                    <Settings size={14} style={{ color: '#90a8cc' }} />
+                    <span className="text-[11px]" style={{ color: '#90a8cc' }}>{t.settings}</span>
+                    <ChevronRight size={12} className="ml-auto" style={{ color: 'rgba(144, 168, 204, 0.3)' }} />
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-[#0e1a3a]/50"
+                    style={{ borderTop: '1px solid #0e1a3a' }}
+                  >
+                    <LogOut size={14} style={{ color: '#ef4444' }} />
+                    <span className="text-[11px]" style={{ color: '#ef4444' }}>
+                      {language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}
                     </span>
                   </button>
-                );
-              })}
+                </div>
+              )}
             </div>
-          </div>
-        )}
-
-        {/* View Content */}
-        <div className="flex-1 flex flex-col mt-[52px] md:mt-0">
-          {renderView()}
-        </div>
-      </div>
-
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 flex items-center justify-around py-2 z-30 jarvis-bottom-nav" style={{ background: 'rgba(8, 14, 30, 0.95)', borderTop: '1px solid #0e1a3a', backdropFilter: 'blur(20px)' }}>
-        {NAV_TABS.slice(0, 5).map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
+          ) : (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-all"
-              style={{ background: isActive ? `${tab.color}08` : 'transparent' }}
+              onClick={() => setShowLogin(true)}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-lg transition-all"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(124, 92, 255, 0.15))', 
+                border: '1px solid rgba(0, 229, 255, 0.2)' 
+              }}
             >
-              <Icon size={20} style={{ color: isActive ? tab.color : '#90a8cc' }} />
-              <span className="text-[8px] uppercase tracking-wider" style={{ color: isActive ? tab.color : '#90a8cc' }}>
-                {tab.id === 'chat' ? 'Chat' : tab.id === 'photo' ? 'Photo' : tab.id === 'video' ? 'Video' : tab.id === 'voice' ? 'Voice' : 'Slides'}
+              <User size={14} style={{ color: '#00e5ff' }} />
+              <span className="text-[10px] tracking-wider font-medium" style={{ color: '#00e5ff' }}>
+                {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
               </span>
             </button>
-          );
-        })}
+          )}
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col pt-[52px] pb-[72px] relative z-10">
+        {renderView()}
       </div>
+
+      {/* Bottom Navigation - For ALL devices */}
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        translations={{
+          home: t.home,
+          chat: t.chat,
+          voice: t.voice,
+          photo: t.photo,
+          video: t.video,
+          slides: t.slides,
+          gallery: t.gallery,
+          settings: t.settings,
+        }}
+      />
+
+      {/* Login Modal */}
+      <LoginView
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        onLogin={handleLogin}
+        language={language}
+        translations={{
+          welcomeBack: t.welcomeBack,
+          loginToContinue: t.loginToContinue,
+          email: t.email,
+          password: t.password,
+          signIn: t.signIn,
+          signUp: t.signUp,
+          noAccount: t.noAccount,
+          hasAccount: t.hasAccount,
+          name: t.name,
+          createAccount: t.createAccount,
+          orContinueAs: t.orContinueAs,
+          guest: t.guest,
+          loggingIn: t.loggingIn,
+          loginSuccess: t.loginSuccess,
+          loginError: t.loginError,
+          forgotPassword: t.forgotPassword,
+        }}
+      />
+
+      {/* Click outside to close user menu */}
+      {showUserMenu && (
+        <div 
+          className="fixed inset-0 z-30"
+          onClick={() => setShowUserMenu(false)}
+        />
+      )}
     </div>
   );
 }

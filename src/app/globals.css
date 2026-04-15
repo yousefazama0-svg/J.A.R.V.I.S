@@ -819,3 +819,76 @@ body {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
 }
+
+/* ===== ROTATING TEXT ===== */
+.jarvis-rotating-text {
+  display: inline-flex;
+  animation: jarvis-scroll-text 15s linear infinite;
+}
+
+@keyframes jarvis-scroll-text {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ===== VIEW TRANSITIONS ===== */
+.view-enter {
+  animation: view-enter 0.3s ease-out forwards;
+}
+
+.view-exit {
+  animation: view-exit 0.2s ease-in forwards;
+}
+
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes view-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* ===== SAFE AREA FOR MOBILE ===== */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ===== INPUT FOCUS STYLES ===== */
+input:focus, textarea:focus {
+  border-color: rgba(0, 229, 255, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.1);
+}
+
+/* ===== BUTTON PRESSED EFFECT ===== */
+button:active {
+  transform: scale(0.98);
+}
+
+/* ===== SMOOTH SCROLLBAR ===== */
+* {
+  scroll-behavior: smooth;
+}
+
+/* ===== BACKDROP BLUR FALLBACK ===== */
+@supports not (backdrop-filter: blur(24px)) {
+  .jarvis-bottom-nav,
+  header {
+    background: rgba(6, 10, 20, 0.98) !important;
+  }
+}
