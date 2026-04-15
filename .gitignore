@@ -52,3 +52,4 @@ upload/
 # API Keys (never commit these)
 .env
 *.env.local
+.env
