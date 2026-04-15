@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Home, MessageSquare, Mic, Camera, Video, Presentation, Images, Settings } from 'lucide-react';
+import { Home, MessageSquare, Mic, Camera, Video, Presentation, Images, Settings, Globe, Scissors, Code2, Eye } from 'lucide-react';
 
-export type TabId = 'home' | 'chat' | 'voice' | 'photo' | 'video' | 'slides' | 'gallery' | 'settings';
+export type TabId = 'home' | 'chat' | 'voice' | 'photo' | 'video' | 'slides' | 'gallery' | 'settings' | 'translator' | 'summarizer' | 'code' | 'analyzer';
 
 interface BottomNavProps {
   activeTab: TabId;
@@ -17,11 +17,15 @@ interface BottomNavProps {
     slides: string;
     gallery: string;
     settings: string;
+    translator?: string;
+    summarizer?: string;
+    code?: string;
+    analyzer?: string;
   };
 }
 
-// Tab configuration with icons and colors
-const TAB_CONFIG: { id: TabId; icon: React.ElementType; color: string }[] = [
+// Primary tabs (shown in bottom nav)
+const PRIMARY_TABS: { id: TabId; icon: React.ElementType; color: string }[] = [
   { id: 'home', icon: Home, color: '#00e5ff' },
   { id: 'chat', icon: MessageSquare, color: '#00e5ff' },
   { id: 'photo', icon: Camera, color: '#7c5cff' },
@@ -31,6 +35,16 @@ const TAB_CONFIG: { id: TabId; icon: React.ElementType; color: string }[] = [
   { id: 'gallery', icon: Images, color: '#a855f7' },
   { id: 'settings', icon: Settings, color: '#90a8cc' },
 ];
+
+// Extended tabs (new tools - can be accessed from home or added to nav)
+export const EXTENDED_TABS: { id: TabId; icon: React.ElementType; color: string }[] = [
+  { id: 'translator', icon: Globe, color: '#10b981' },
+  { id: 'summarizer', icon: Scissors, color: '#f59e0b' },
+  { id: 'code', icon: Code2, color: '#ec4899' },
+  { id: 'analyzer', icon: Eye, color: '#8b5cf6' },
+];
+
+const TAB_CONFIG = [...PRIMARY_TABS, ...EXTENDED_TABS];
 
 export default function BottomNav({ activeTab, onTabChange, translations }: BottomNavProps) {
   const getLabel = (id: TabId): string => {
@@ -43,6 +57,10 @@ export default function BottomNav({ activeTab, onTabChange, translations }: Bott
       slides: translations.slides,
       gallery: translations.gallery,
       settings: translations.settings,
+      translator: translations.translator || 'Translator',
+      summarizer: translations.summarizer || 'Summarizer',
+      code: translations.code || 'Code',
+      analyzer: translations.analyzer || 'Analyzer',
     };
     return labels[id];
   };
@@ -59,7 +77,7 @@ export default function BottomNav({ activeTab, onTabChange, translations }: Bott
       }}
     >
       <div className="flex items-center justify-around w-full max-w-lg mx-auto">
-        {TAB_CONFIG.map((tab) => {
+        {PRIMARY_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
           const config = getTabConfig(tab.id);

@@ -23,8 +23,23 @@ interface VoiceOption {
   language: string;
 }
 
+// Voice categories for better organization
+const VOICE_CATEGORIES = {
+  jarvis: 'JARVIS AI',
+  premium: 'Premium Voices',
+  english: 'English Voices',
+  arabic: 'أصوات عربية',
+  specialized: 'Specialized',
+};
+
 const VOICE_OPTIONS: VoiceOption[] = [
-  // Core voices
+  // 🔥 JARVIS Official Voice - The real AI assistant voice
+  { id: 'jarvis', name: 'JARVIS', gender: 'male', language: 'en' },
+  { id: 'jarvis-deep', name: 'JARVIS Deep', gender: 'male', language: 'en' },
+  { id: 'jarvis-calm', name: 'JARVIS Calm', gender: 'male', language: 'en' },
+  { id: 'jarvis-pro', name: 'JARVIS Pro', gender: 'male', language: 'en' },
+  
+  // Premium voices
   { id: 'tongtong', name: 'TongTong', gender: 'neutral', language: 'multi' },
   { id: 'alloy', name: 'Alloy', gender: 'neutral', language: 'en' },
   { id: 'echo', name: 'Echo', gender: 'male', language: 'en' },
@@ -33,7 +48,7 @@ const VOICE_OPTIONS: VoiceOption[] = [
   { id: 'nova', name: 'Nova', gender: 'female', language: 'en' },
   { id: 'shimmer', name: 'Shimmer', gender: 'female', language: 'en' },
   
-  // Extended voices
+  // Extended English voices
   { id: 'adam', name: 'Adam', gender: 'male', language: 'en' },
   { id: 'bella', name: 'Bella', gender: 'female', language: 'en' },
   { id: 'charlie', name: 'Charlie', gender: 'male', language: 'en' },
@@ -42,18 +57,39 @@ const VOICE_OPTIONS: VoiceOption[] = [
   { id: 'frank', name: 'Frank', gender: 'male', language: 'en' },
   { id: 'grace', name: 'Grace', gender: 'female', language: 'en' },
   { id: 'henry', name: 'Henry', gender: 'male', language: 'en' },
+  { id: 'iris', name: 'Iris', gender: 'female', language: 'en' },
+  { id: 'jack', name: 'Jack', gender: 'male', language: 'en' },
+  { id: 'kate', name: 'Kate', gender: 'female', language: 'en' },
+  { id: 'liam', name: 'Liam', gender: 'male', language: 'en' },
+  { id: 'mia', name: 'Mia', gender: 'female', language: 'en' },
+  { id: 'noah', name: 'Noah', gender: 'male', language: 'en' },
+  { id: 'olivia', name: 'Olivia', gender: 'female', language: 'en' },
+  { id: 'peter', name: 'Peter', gender: 'male', language: 'en' },
   
   // Arabic voices
   { id: 'ar-male-1', name: 'أحمد', gender: 'male', language: 'ar' },
   { id: 'ar-male-2', name: 'عمر', gender: 'male', language: 'ar' },
+  { id: 'ar-male-3', name: 'خالد', gender: 'male', language: 'ar' },
+  { id: 'ar-male-4', name: 'يوسف', gender: 'male', language: 'ar' },
   { id: 'ar-female-1', name: 'فاطمة', gender: 'female', language: 'ar' },
   { id: 'ar-female-2', name: 'ليلى', gender: 'female', language: 'ar' },
+  { id: 'ar-female-3', name: 'نور', gender: 'female', language: 'ar' },
+  { id: 'ar-female-4', name: 'سارة', gender: 'female', language: 'ar' },
   
   // Specialized voices
   { id: 'en-male-deep', name: 'Deep Voice', gender: 'male', language: 'en' },
   { id: 'en-male-casual', name: 'Casual Male', gender: 'male', language: 'en' },
+  { id: 'en-male-news', name: 'News Anchor', gender: 'male', language: 'en' },
+  { id: 'en-male-narrator', name: 'Narrator', gender: 'male', language: 'en' },
   { id: 'en-female-soft', name: 'Soft Voice', gender: 'female', language: 'en' },
   { id: 'en-female-professional', name: 'Professional', gender: 'female', language: 'en' },
+  { id: 'en-female-friendly', name: 'Friendly', gender: 'female', language: 'en' },
+  { id: 'en-female-young', name: 'Young Female', gender: 'female', language: 'en' },
+  
+  // Celebrity-style voices
+  { id: 'celebrity-1', name: 'Classic AI', gender: 'male', language: 'en' },
+  { id: 'celebrity-2', name: 'Modern AI', gender: 'neutral', language: 'en' },
+  { id: 'celebrity-3', name: 'Sci-Fi AI', gender: 'neutral', language: 'en' },
 ];
 
 // Voice preset configurations
@@ -153,7 +189,7 @@ export default function VoiceView({ translations, language }: VoiceViewProps) {
   const [isSupported, setIsSupported] = useState(true);
   
   // Voice settings
-  const [selectedVoice, setSelectedVoice] = useState<string>('tongtong');
+  const [selectedVoice, setSelectedVoice] = useState<string>('jarvis');
   const [voiceSpeed, setVoiceSpeed] = useState(1.0);
   const [voicePitch, setVoicePitch] = useState(1.0);
   const [voiceVolume, setVoiceVolume] = useState(0.8);

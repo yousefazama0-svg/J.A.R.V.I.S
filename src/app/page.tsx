@@ -28,6 +28,11 @@ import BackgroundEffects from '@/components/jarvis/BackgroundEffects';
 import BottomNav, { TabId } from '@/components/jarvis/BottomNav';
 import ArcReactorLogo from '@/components/jarvis/ArcReactorLogo';
 import LoginView from '@/components/jarvis/LoginView';
+// New tools
+import TranslatorView from '@/components/jarvis/TranslatorView';
+import SummarizerView from '@/components/jarvis/SummarizerView';
+import CodeGeneratorView from '@/components/jarvis/CodeGeneratorView';
+import ImageAnalyzerView from '@/components/jarvis/ImageAnalyzerView';
 
 type Tab = TabId;
 type Language = 'en' | 'ar';
@@ -247,6 +252,55 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     away: 'Away',
     image: 'Image',
     video: 'Video',
+    
+    // New Tools - Translator
+    translator: 'Translator',
+    translatorSubtitle: 'AI-Powered Translation',
+    sourceLanguage: 'Source Language',
+    targetLanguage: 'Target Language',
+    enterText: 'Enter text to translate...',
+    translation: 'Translation',
+    translate: 'Translate',
+    translating: 'Translating...',
+    swapLanguages: 'Swap Languages',
+    listen: 'Listen',
+    detected: 'Detected',
+    
+    // New Tools - Summarizer
+    summarizer: 'Summarizer',
+    summarizerSubtitle: 'AI Text Summarization',
+    summaryLength: 'Summary Length',
+    summaryStyle: 'Style',
+    summarize: 'Summarize',
+    summarizing: 'Summarizing...',
+    originalText: 'Original Text',
+    summarizedText: 'Summary',
+    characters: 'characters',
+    words: 'words',
+    reduction: 'reduction',
+    
+    // New Tools - Code Generator
+    codeGenerator: 'Code Generator',
+    codeGeneratorSubtitle: 'AI Code Assistant',
+    enterPrompt: 'Describe what code you need...',
+    enterCode: 'Paste your code here...',
+    generatedCode: 'Generated Code',
+    action: 'Action',
+    inputCode: 'Input Code',
+    
+    // New Tools - Image Analyzer
+    imageAnalyzer: 'Image Analyzer',
+    imageAnalyzerSubtitle: 'AI Vision Analysis',
+    analyze: 'Analyze',
+    analyzing: 'Analyzing...',
+    analysis: 'Analysis',
+    description: 'Description',
+    objects: 'Objects Detected',
+    colors: 'Colors',
+    mood: 'Mood',
+    suggestions: 'Suggestions',
+    orPasteUrl: 'Or paste image URL...',
+    dragDrop: 'Drag & drop an image here',
   },
   ar: {
     // Navigation
@@ -456,6 +510,55 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     away: 'بعيد',
     image: 'صورة',
     video: 'فيديو',
+    
+    // New Tools - Translator
+    translator: 'المترجم',
+    translatorSubtitle: 'ترجمة ذكية بالذكاء الاصطناعي',
+    sourceLanguage: 'اللغة المصدر',
+    targetLanguage: 'اللغة المستهدفة',
+    enterText: 'أدخل النص للترجمة...',
+    translation: 'الترجمة',
+    translate: 'ترجم',
+    translating: 'جارٍ الترجمة...',
+    swapLanguages: 'تبديل اللغات',
+    listen: 'استمع',
+    detected: 'تم الكشف',
+    
+    // New Tools - Summarizer
+    summarizer: 'الملخص',
+    summarizerSubtitle: 'تلخيص النصوص بالذكاء الاصطناعي',
+    summaryLength: 'طول الملخص',
+    summaryStyle: 'الأسلوب',
+    summarize: 'لخص',
+    summarizing: 'جارٍ التلخيص...',
+    originalText: 'النص الأصلي',
+    summarizedText: 'الملخص',
+    characters: 'حرف',
+    words: 'كلمة',
+    reduction: 'تقليل',
+    
+    // New Tools - Code Generator
+    codeGenerator: 'منشئ الأكواد',
+    codeGeneratorSubtitle: 'مساعد برمجة ذكي',
+    enterPrompt: 'صف الكود الذي تحتاجه...',
+    enterCode: 'الصق الكود هنا...',
+    generatedCode: 'الكود المُنشأ',
+    action: 'الإجراء',
+    inputCode: 'الكود المدخل',
+    
+    // New Tools - Image Analyzer
+    imageAnalyzer: 'محلل الصور',
+    imageAnalyzerSubtitle: 'تحليل الصور بالذكاء الاصطناعي',
+    analyze: 'حلل',
+    analyzing: 'جارٍ التحليل...',
+    analysis: 'التحليل',
+    description: 'الوصف',
+    objects: 'الكائنات المكتشفة',
+    colors: 'الألوان',
+    mood: 'المزاج',
+    suggestions: 'اقتراحات',
+    orPasteUrl: 'أو الصق رابط الصورة...',
+    dragDrop: 'اسحب وأفلت صورة هنا',
   },
 };
 
@@ -848,6 +951,107 @@ export default function Home() {
               }}
               language={language}
               onLanguageChange={handleLanguageChange}
+            />
+          </div>
+        );
+      // New Tools
+      case 'translator':
+        return (
+          <div className={viewClass}>
+            <TranslatorView
+              translations={{
+                title: t.translator,
+                subtitle: t.translatorSubtitle,
+                sourceLanguage: t.sourceLanguage,
+                targetLanguage: t.targetLanguage,
+                enterText: t.enterText,
+                translation: t.translation,
+                translate: t.translate,
+                translating: t.translating,
+                swapLanguages: t.swapLanguages,
+                copy: t.copy || 'Copy',
+                listen: t.listen,
+                clear: t.clearChat,
+                history: t.history || 'History',
+                detected: t.detected,
+              }}
+              language={language}
+            />
+          </div>
+        );
+      case 'summarizer':
+        return (
+          <div className={viewClass}>
+            <SummarizerView
+              translations={{
+                title: t.summarizer,
+                subtitle: t.summarizerSubtitle,
+                enterText: t.enterText,
+                summary: t.translation,
+                summarize: t.summarize,
+                summarizing: t.summarizing,
+                length: t.summaryLength,
+                style: t.summaryStyle,
+                copy: t.copy || 'Copy',
+                clear: t.clearChat,
+                download: t.download,
+                originalText: t.originalText,
+                summarizedText: t.summarizedText,
+                characters: t.characters,
+                words: t.words,
+                reduction: t.reduction,
+              }}
+              language={language}
+            />
+          </div>
+        );
+      case 'code':
+        return (
+          <div className={viewClass}>
+            <CodeGeneratorView
+              translations={{
+                title: t.codeGenerator,
+                subtitle: t.codeGeneratorSubtitle,
+                enterPrompt: t.enterPrompt,
+                enterCode: t.enterCode,
+                generatedCode: t.generatedCode,
+                generate: t.generate,
+                generating: t.generating,
+                language: t.language || 'Language',
+                action: t.action,
+                copy: t.copy || 'Copy',
+                clear: t.clearChat,
+                download: t.download,
+                run: 'Run',
+                inputCode: t.inputCode,
+              }}
+              language={language}
+            />
+          </div>
+        );
+      case 'analyzer':
+        return (
+          <div className={viewClass}>
+            <ImageAnalyzerView
+              translations={{
+                title: t.imageAnalyzer,
+                subtitle: t.imageAnalyzerSubtitle,
+                uploadImage: t.uploadImage,
+                orPasteUrl: t.orPasteUrl,
+                analyze: t.analyze,
+                analyzing: t.analyzing,
+                analysis: t.analysis,
+                description: t.description,
+                objects: t.objects,
+                colors: t.colors,
+                mood: t.mood,
+                suggestions: t.suggestions,
+                copy: t.copy || 'Copy',
+                clear: t.clearChat,
+                download: t.download,
+                dragDrop: t.dragDrop,
+              }}
+              language={language}
             />
           </div>
         );

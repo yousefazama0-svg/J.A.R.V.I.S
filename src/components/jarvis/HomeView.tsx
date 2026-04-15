@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Camera, Video, Mic, Presentation, Images, Sparkles, Zap, Shield, Cpu, Globe } from 'lucide-react';
+import { MessageSquare, Camera, Video, Mic, Presentation, Images, Sparkles, Zap, Shield, Cpu, Globe, Languages, Scissors, Code2, Eye } from 'lucide-react';
 import ArcReactorLogo from './ArcReactorLogo';
 
 interface HomeViewProps {
@@ -77,13 +77,22 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const modules = [
+  // Core modules (original)
+  const coreModules = [
     { id: 'chat', icon: MessageSquare, color: '#00e5ff', label: translations.aiChat, desc: language === 'ar' ? 'محادثة ذكية' : 'Smart Chat' },
     { id: 'photo', icon: Camera, color: '#7c5cff', label: translations.photoStudio, desc: language === 'ar' ? 'إنشاء الصور' : 'Create Images' },
     { id: 'video', icon: Video, color: '#f59e0b', label: translations.videoEngine, desc: language === 'ar' ? 'إنشاء الفيديو' : 'Create Videos' },
     { id: 'voice', icon: Mic, color: '#0088cc', label: translations.voiceAssistant, desc: language === 'ar' ? 'تفاعل صوتي' : 'Voice Interaction' },
     { id: 'slides', icon: Presentation, color: '#10b981', label: translations.slidesBuilder, desc: language === 'ar' ? 'عروض تقديمية' : 'Presentations' },
     { id: 'gallery', icon: Images, color: '#a855f7', label: translations.mediaGallery, desc: language === 'ar' ? 'معرض الوسائط' : 'Media Gallery' },
+  ];
+
+  // New AI Tools
+  const newTools = [
+    { id: 'translator', icon: Languages, color: '#10b981', label: language === 'ar' ? 'المترجم' : 'Translator', desc: language === 'ar' ? 'ترجمة ذكية' : 'AI Translation' },
+    { id: 'summarizer', icon: Scissors, color: '#f59e0b', label: language === 'ar' ? 'الملخص' : 'Summarizer', desc: language === 'ar' ? 'تلخيص النصوص' : 'Text Summarization' },
+    { id: 'code', icon: Code2, color: '#ec4899', label: language === 'ar' ? 'منشئ الأكواد' : 'Code Gen', desc: language === 'ar' ? 'مساعد برمجة' : 'Code Assistant' },
+    { id: 'analyzer', icon: Eye, color: '#8b5cf6', label: language === 'ar' ? 'محلل الصور' : 'Image AI', desc: language === 'ar' ? 'تحليل الصور' : 'Image Analysis' },
   ];
 
   const capabilities = [
@@ -135,17 +144,17 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
         </div>
       </div>
 
-      {/* Modules Grid */}
+      {/* Core Modules Grid */}
       <div className="px-4 pb-4">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={12} style={{ color: '#00e5ff' }} />
           <span className="text-[10px] tracking-widest uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
-            {language === 'ar' ? 'الوحدات النمطية' : 'Modules'}
+            {language === 'ar' ? 'الوحدات النمطية' : 'Core Modules'}
           </span>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {modules.map((module, idx) => {
+          {coreModules.map((module, idx) => {
             const Icon = module.icon;
             return (
               <button
@@ -171,10 +180,48 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
         </div>
       </div>
 
+      {/* New AI Tools */}
+      <div className="px-4 pb-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Zap size={12} style={{ color: '#ec4899' }} />
+          <span className="text-[10px] tracking-widest uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+            {language === 'ar' ? 'أدوات ذكية جديدة' : 'New AI Tools'}
+          </span>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {newTools.map((tool, idx) => {
+            const Icon = tool.icon;
+            return (
+              <button
+                key={tool.id}
+                onClick={() => onNavigate(tool.id)}
+                className="jarvis-mod-card text-left jarvis-animate-fade-in group"
+                style={{ animationDelay: `${(idx + 6) * 100}ms` }}
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110"
+                    style={{ background: `${tool.color}15`, border: `1px solid ${tool.color}30` }}
+                  >
+                    <Icon size={16} style={{ color: tool.color }} />
+                  </div>
+                  <div className="px-1.5 py-0.5 rounded text-[7px] uppercase" style={{ background: `${tool.color}20`, color: tool.color }}>
+                    New
+                  </div>
+                </div>
+                <h3 className="text-[11px] font-bold mb-0.5" style={{ color: '#d0e4f8' }}>{tool.label}</h3>
+                <p className="text-[9px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{tool.desc}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Capabilities */}
       <div className="px-4 pb-4">
         <div className="flex items-center gap-2 mb-3">
-          <Zap size={12} style={{ color: '#f59e0b' }} />
+          <Shield size={12} style={{ color: '#10b981' }} />
           <span className="text-[10px] tracking-widest uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
             {translations.capabilities}
           </span>
