@@ -20,12 +20,30 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
   const [uptime, setUptime] = useState(0);
+  const [greeting, setGreeting] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const update = () => {
       const now = new Date();
       setTime(now.toLocaleTimeString(language === 'ar' ? 'ar-SA' : 'en-US', { hour12: false }));
       setDate(now.toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }));
+      
+      // Set greeting based on time
+      const h = now.getHours();
+      if (language === 'ar') {
+        if (h < 12) setGreeting('صباح الخير، سيدي.');
+        else if (h < 18) setGreeting('مساء الخير، سيدي.');
+        else setGreeting('سعيد بعودتك، سيدي.');
+      } else {
+        if (h < 12) setGreeting('Good morning, sir.');
+        else if (h < 18) setGreeting('Good afternoon, sir.');
+        else setGreeting('Good to have you back, sir.');
+      }
     };
     update();
     const interval = setInterval(update, 1000);
@@ -45,19 +63,6 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  };
-
-  const getGreeting = () => {
-    if (language === 'ar') {
-      const h = new Date().getHours();
-      if (h < 12) return 'صباح الخير، سيدي.';
-      if (h < 18) return 'مساء الخير، سيدي.';
-      return 'سعيد بعودتك، سيدي.';
-    }
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning, sir.';
-    if (h < 18) return 'Good afternoon, sir.';
-    return 'Good to have you back, sir.';
   };
 
   const quickActions = language === 'ar' ? [
@@ -102,13 +107,13 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
       {/* Time */}
       <div className="flex flex-col items-center gap-1.5 jarvis-animate-fade-in jarvis-delay-200">
         <div className="text-2xl md:text-4xl font-mono tracking-[0.15em]" style={{ color: '#d0e4f8' }}>
-          {time}
+          {mounted ? time : '--:--:--'}
         </div>
         <p className="text-[11px] jarvis-cursor-blink" style={{ color: '#90a8cc' }}>
-          {getGreeting()}
+          {mounted ? greeting : '...'}
         </p>
         <p className="text-[9px] tracking-wider" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
-          {date}
+          {mounted ? date : '...'}
         </p>
       </div>
 

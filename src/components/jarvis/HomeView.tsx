@@ -28,12 +28,30 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
   const [uptime, setUptime] = useState(0);
+  const [greeting, setGreeting] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const update = () => {
       const now = new Date();
       setTime(now.toLocaleTimeString(language === 'ar' ? 'ar-SA' : 'en-US', { hour12: false }));
       setDate(now.toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+      
+      // Set greeting based on time
+      const h = now.getHours();
+      if (language === 'ar') {
+        if (h < 12) setGreeting('صباح الخير');
+        else if (h < 18) setGreeting('مساء الخير');
+        else setGreeting('مرحباً بك');
+      } else {
+        if (h < 12) setGreeting('Good Morning');
+        else if (h < 18) setGreeting('Good Afternoon');
+        else setGreeting('Welcome Back');
+      }
     };
     update();
     const interval = setInterval(update, 1000);
@@ -53,19 +71,6 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  };
-
-  const getGreeting = () => {
-    if (language === 'ar') {
-      const h = new Date().getHours();
-      if (h < 12) return 'صباح الخير';
-      if (h < 18) return 'مساء الخير';
-      return 'مرحباً بك';
-    }
-    const h = new Date().getHours();
-    if (h < 12) return 'Good Morning';
-    if (h < 18) return 'Good Afternoon';
-    return 'Welcome Back';
   };
 
   const modules = [
@@ -107,10 +112,10 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
         {/* Time & Greeting */}
         <div className="flex flex-col items-center mt-4 mb-6">
           <div className="text-3xl md:text-5xl font-mono tracking-[0.15em] mb-1" style={{ color: '#d0e4f8' }}>
-            {time}
+            {mounted ? time : '--:--:--'}
           </div>
-          <p className="text-[13px] mb-1" style={{ color: '#00e5ff' }}>{getGreeting()}</p>
-          <p className="text-[10px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{date}</p>
+          <p className="text-[13px] mb-1" style={{ color: '#00e5ff' }}>{mounted ? greeting : '...'}</p>
+          <p className="text-[10px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{mounted ? date : '...'}</p>
         </div>
 
         {/* Status Bar */}
