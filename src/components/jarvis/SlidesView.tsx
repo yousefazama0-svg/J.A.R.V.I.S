@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Presentation,
   Loader2,
@@ -19,6 +19,7 @@ import {
   Quote,
   Minus,
   Check,
+  Wand2,
 } from 'lucide-react';
 
 interface Slide {
@@ -32,6 +33,19 @@ const SLIDE_COUNT_OPTIONS = [5, 8, 10, 12, 15, 20, 25, 30];
 type SlideStyle = 'Professional' | 'Creative' | 'Minimal' | 'Bold' | 'Academic' | 'Corporate' | 'Startup' | 'Educational';
 
 const STYLE_OPTIONS: SlideStyle[] = ['Professional', 'Creative', 'Minimal', 'Bold', 'Academic', 'Corporate', 'Startup', 'Educational'];
+
+type TransitionType = 'fade' | 'slide' | 'zoom' | 'flip' | 'wipe' | 'glitch' | 'dissolve' | 'none';
+
+const TRANSITION_OPTIONS: { value: TransitionType; label: string; labelAr: string }[] = [
+  { value: 'fade', label: 'Fade', labelAr: 'تلاشي' },
+  { value: 'slide', label: 'Slide', labelAr: 'انزلاق' },
+  { value: 'zoom', label: 'Zoom', labelAr: 'تكبير' },
+  { value: 'flip', label: 'Flip', labelAr: 'قلب' },
+  { value: 'wipe', label: 'Wipe', labelAr: 'مسح' },
+  { value: 'glitch', label: 'Glitch', labelAr: 'تقطيع' },
+  { value: 'dissolve', label: 'Dissolve', labelAr: 'ذوبان' },
+  { value: 'none', label: 'None', labelAr: 'بدون' },
+];
 
 const LAYOUT_ICONS: Record<string, React.ReactNode> = {
   'title-slide': <Type size={12} />,
@@ -66,6 +80,7 @@ interface SlidesViewProps {
     copied: string;
     speakerNotes: string;
     slidesGenerated: string;
+    transition?: string;
   };
   language: 'en' | 'ar';
 }
@@ -74,6 +89,7 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
   const [topic, setTopic] = useState('');
   const [slideCount, setSlideCount] = useState(8);
   const [style, setStyle] = useState<SlideStyle>('Professional');
+  const [transition, setTransition] = useState<TransitionType>('fade');
   const [isGenerating, setIsGenerating] = useState(false);
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -82,6 +98,9 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
   const [copiedSlide, setCopiedSlide] = useState<number | null>(null);
   const [expandedNotes, setExpandedNotes] = useState<number | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const prevSlideRef = useRef(currentSlide);
 
   useEffect(() => {
     if (initialTopic) setTopic(initialTopic);
@@ -171,8 +190,41 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
   }, [slides]);
 
   const goToSlide = useCallback((idx: number) => {
-    if (idx >= 0 && idx < slides.length) setCurrentSlide(idx);
-  }, [slides.length]);
+    if (idx >= 0 && idx < slides.length && !isTransitioning) {
+      setTransitionDirection(idx > currentSlide ? 'forward' : 'backward');
+      setIsTransitioning(true);
+      prevSlideRef.current = currentSlide;
+      
+      // Transition duration varies by type
+      const duration = transition === 'none' ? 100 : 
+                      transition === 'flip' ? 500 : 
+                      transition === 'glitch' ? 400 : 400;
+      
+      setTimeout(() => {
+        setCurrentSlide(idx);
+        setTimeout(() => setIsTransitioning(false), duration);
+      }, 100);
+    }
+  }, [slides.length, currentSlide, isTransitioning, transition]);
+
+  const getTransitionClass = (isEntering: boolean) => {
+    if (transition === 'none') return '';
+    
+    const direction = transitionDirection;
+    
+    // Handle reverse animations for slide and flip
+    const needsReverse = (transition === 'slide' || transition === 'flip') && direction === 'backward';
+    
+    if (needsReverse) {
+      return isEntering 
+        ? `slide-transition-${transition}-reverse-enter`
+        : `slide-transition-${transition}-reverse-exit`;
+    }
+    
+    return isEntering 
+      ? `slide-transition-${transition}-enter`
+      : `slide-transition-${transition}-exit`;
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') generateSlides();
@@ -238,15 +290,22 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
             <Presentation size={14} style={{ color: '#f59e0b' }} />
             <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: '#d0e4f8' }}>{topic}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <span className="text-[8px] px-2 py-0.5 rounded" style={{ background: 'rgba(0, 229, 255, 0.1)', color: '#00e5ff' }}>
+              {TRANSITION_OPTIONS.find(t => t.value === transition)?.[language === 'ar' ? 'labelAr' : 'label']}
+            </span>
             <span className="text-[10px] font-mono" style={{ color: '#f59e0b' }}>{formatSlideNumber(currentSlide + 1, slides.length)}</span>
             <button onClick={() => setIsPreviewMode(false)} className="p-1.5 rounded-lg" style={{ background: 'rgba(8, 14, 30, 0.8)', border: '1px solid #0e1a3a' }}>
               <X size={14} style={{ color: '#90a8cc' }} />
             </button>
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-2xl aspect-[16/9] flex flex-col items-center justify-center p-8 jarvis-hud-card" style={{ borderRadius: '16px' }}>
+        <div className="flex-1 flex items-center justify-center p-6 overflow-hidden">
+          <div 
+            key={currentSlide}
+            className={`w-full max-w-2xl aspect-[16/9] flex flex-col items-center justify-center p-8 jarvis-hud-card ${getTransitionClass(true)}`}
+            style={{ borderRadius: '16px' }}
+          >
             <div className="jarvis-scan-line" />
             <span className="text-[9px] font-mono mb-4 px-2 py-0.5 rounded" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}>{slide.layout}</span>
             <h2 className="text-lg md:text-2xl font-bold text-center mb-4" style={{ color: '#d0e4f8' }}>{slide.title}</h2>
@@ -257,7 +316,7 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
         <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: '1px solid #0e1a3a' }}>
           <button onClick={() => goToSlide(currentSlide - 1)} disabled={currentSlide === 0} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] transition-all"
             style={{ background: currentSlide > 0 ? 'rgba(245, 158, 11, 0.1)' : 'transparent', border: `1px solid ${currentSlide > 0 ? 'rgba(245, 158, 11, 0.2)' : 'transparent'}`, color: currentSlide > 0 ? '#f59e0b' : '#90a8cc', opacity: currentSlide > 0 ? 1 : 0.3, cursor: currentSlide > 0 ? 'pointer' : 'not-allowed' }}>
-            <ChevronLeft size={12} /> Previous
+            <ChevronLeft size={12} /> {language === 'ar' ? 'السابق' : 'Previous'}
           </button>
           <div className="flex items-center gap-1">
             {slides.map((_, i) => (
@@ -267,7 +326,7 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
           </div>
           <button onClick={() => goToSlide(currentSlide + 1)} disabled={currentSlide === slides.length - 1} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] transition-all"
             style={{ background: currentSlide < slides.length - 1 ? 'rgba(245, 158, 11, 0.1)' : 'transparent', border: `1px solid ${currentSlide < slides.length - 1 ? 'rgba(245, 158, 11, 0.2)' : 'transparent'}`, color: currentSlide < slides.length - 1 ? '#f59e0b' : '#90a8cc', opacity: currentSlide < slides.length - 1 ? 1 : 0.3, cursor: currentSlide < slides.length - 1 ? 'pointer' : 'not-allowed' }}>
-            Next <ChevronRight size={12} />
+            {language === 'ar' ? 'التالي' : 'Next'} <ChevronRight size={12} />
           </button>
         </div>
       </div>
@@ -326,6 +385,22 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
                 <button key={s} onClick={() => setStyle(s)} className="px-3 py-1 rounded-md text-[9px] transition-all"
                   style={{ background: style === s ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.04)', border: `1px solid ${style === s ? 'rgba(245, 158, 11, 0.35)' : 'rgba(245, 158, 11, 0.1)'}`, color: style === s ? '#f59e0b' : '#90a8cc' }}>
                   {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Transition */}
+          <div className="flex items-start gap-2 mb-3">
+            <span className="text-[9px] tracking-[0.12em] uppercase shrink-0 pt-1 flex items-center gap-1" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+              <Wand2 size={10} />
+              {translations.transition || (language === 'ar' ? 'الانتقال' : 'Transition')}
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {TRANSITION_OPTIONS.map(t => (
+                <button key={t.value} onClick={() => setTransition(t.value)} className="px-2.5 py-1 rounded-md text-[9px] transition-all"
+                  style={{ background: transition === t.value ? 'rgba(0, 229, 255, 0.15)' : 'rgba(0, 229, 255, 0.04)', border: `1px solid ${transition === t.value ? 'rgba(0, 229, 255, 0.35)' : 'rgba(0, 229, 255, 0.1)'}`, color: transition === t.value ? '#00e5ff' : '#90a8cc' }}>
+                  {language === 'ar' ? t.labelAr : t.label}
                 </button>
               ))}
             </div>
