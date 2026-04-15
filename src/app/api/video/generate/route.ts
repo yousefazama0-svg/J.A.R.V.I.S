@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { getZAI } from "@/lib/zai";
 
 interface GenerateRequest {
   prompt: string;
@@ -10,29 +11,33 @@ interface GenerateRequest {
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateRequest = await request.json();
-    const { prompt, style, duration, language } = body;
+    const { prompt, style, duration = 5 } = body;
 
     if (!prompt?.trim()) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    // Video generation requires specialized APIs like:
-    // - Runway ML
-    // - Pika Labs
-    // - Stable Video Diffusion
-    // - Sora (OpenAI)
+    const zai = await getZAI();
+
+    // Use ZAI Video Generation
+    const videoResponse = await zai.video.generate({
+      prompt: `${prompt}, ${style} style`,
+      duration,
+    });
+
+    if (videoResponse.taskId) {
+      return new Response(JSON.stringify({ 
+        videoId: videoResponse.taskId,
+        status: "processing",
+        prompt,
+        style,
+        duration
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
 
     return new Response(JSON.stringify({ 
-      videoId: `video-${Date.now()}`,
-      status: "pending",
-      prompt,
-      style,
-      duration,
-      note: "Video generation requires a video API (Runway ML, Pika Labs, etc.). This is a placeholder response.",
-      message: language === 'ar' 
-        ? "إنشاء الفيديو يتطلب ربط API متخصص مثل Runway ML أو Pika Labs"
-        : "Video generation requires connecting a specialized API like Runway ML or Pika Labs"
-    }), { status: 200, headers: { "Content-Type": "application/json" } });
+      error: "Failed to start video generation" 
+    }), { status: 500, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("[Video Generate] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to generate video";

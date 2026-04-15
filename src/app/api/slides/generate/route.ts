@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import groq, { GROQ_MODELS } from "@/lib/groq";
+import { getZAI } from "@/lib/zai";
 
 interface Slide {
   title: string;
@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
     if (!topic?.trim()) {
       return new Response(JSON.stringify({ error: "Topic is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
+
+    const zai = await getZAI();
 
     const systemPrompt = `You are an expert presentation designer. Create engaging, well-structured slides.
 Return ONLY valid JSON array of slides, no markdown formatting.`;
@@ -55,14 +57,12 @@ Return ONLY a JSON array in this exact format:
 
 First slide should be title-slide. Make it engaging and professional.`;
 
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODELS.chat,
+    const completion = await zai.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
-      temperature: 0.7,
-      max_tokens: 8000,
+      thinking: { type: 'disabled' }
     });
 
     const responseText = completion.choices?.[0]?.message?.content || "[]";
@@ -70,15 +70,12 @@ First slide should be title-slide. Make it engaging and professional.`;
     // Extract JSON from response
     let slides: Slide[] = [];
     try {
-      // Try to parse directly first
       slides = JSON.parse(responseText);
     } catch {
-      // Try to extract JSON from markdown code block
       const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
       if (jsonMatch) {
         slides = JSON.parse(jsonMatch[1]);
       } else {
-        // Try to find array in response
         const arrayMatch = responseText.match(/\[[\s\S]*\]/);
         if (arrayMatch) {
           slides = JSON.parse(arrayMatch[0]);

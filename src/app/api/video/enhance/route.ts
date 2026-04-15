@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import groq, { GROQ_MODELS } from "@/lib/groq";
+import { getZAI } from "@/lib/zai";
 
 interface EnhanceRequest {
   prompt: string;
@@ -16,28 +16,22 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    const systemPrompt = `You are an expert at enhancing video prompts for AI video generation.
-Given a basic prompt, enhance it with details about:
-- Camera movements (pan, zoom, tilt, etc.)
-- Scene transitions
-- Lighting and atmosphere
-- Motion and action
-- Visual style
+    const zai = await getZAI();
 
+    const systemPrompt = `You are an expert at enhancing video prompts for AI video generation.
+Given a basic prompt, enhance it with details about camera movements, scene transitions, lighting, atmosphere, motion, and visual style.
 Return ONLY the enhanced prompt, nothing else.`;
 
     const userPrompt = language === 'ar'
       ? `حسّن هذا الوصف لإنشاء فيديو بأسلوب ${style}: "${prompt}"`
       : `Enhance this prompt for ${style} style video generation: "${prompt}"`;
 
-    const completion = await groq.chat.completions.create({
-      model: GROQ_MODELS.fast,
+    const completion = await zai.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
-      temperature: 0.8,
-      max_tokens: 500,
+      thinking: { type: 'disabled' }
     });
 
     const enhancedPrompt = completion.choices?.[0]?.message?.content || prompt;
