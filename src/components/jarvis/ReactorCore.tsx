@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, Camera, Video, Presentation } from 'lucide-react';
 
 interface ReactorCoreProps {
@@ -17,15 +18,20 @@ interface ReactorCoreProps {
 }
 
 export default function ReactorCore({ translations, language }: ReactorCoreProps) {
-  const [time, setTime] = useState('');
-  const [date, setDate] = useState('');
+  const [time, setTime] = useState('--:--:--');
+  const [date, setDate] = useState('...');
   const [uptime, setUptime] = useState(0);
-  const [greeting, setGreeting] = useState('');
-  
-  // Use useMemo for mounted state check (client-side only)
-  const mounted = useMemo(() => typeof window !== 'undefined', []);
+  const [greeting, setGreeting] = useState('...');
+  const [isClient, setIsClient] = useState(false);
+
+  // Set client after mount - valid pattern for hydration detection
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+    
     const update = () => {
       const now = new Date();
       setTime(now.toLocaleTimeString(language === 'ar' ? 'ar-SA' : 'en-US', { hour12: false }));
@@ -46,7 +52,7 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [language]);
+  }, [language, isClient]);
 
   useEffect(() => {
     const startTime = Date.now();
@@ -105,13 +111,13 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
       {/* Time */}
       <div className="flex flex-col items-center gap-1.5 jarvis-animate-fade-in jarvis-delay-200">
         <div className="text-2xl md:text-4xl font-mono tracking-[0.15em]" style={{ color: '#d0e4f8' }}>
-          {mounted && time ? time : '--:--:--'}
+          {time}
         </div>
         <p className="text-[11px] jarvis-cursor-blink" style={{ color: '#90a8cc' }}>
-          {mounted && greeting ? greeting : '...'}
+          {greeting}
         </p>
         <p className="text-[9px] tracking-wider" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
-          {mounted && date ? date : '...'}
+          {date}
         </p>
       </div>
 

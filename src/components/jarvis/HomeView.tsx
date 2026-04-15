@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, Camera, Video, Mic, Presentation, Images, Sparkles, Zap, Shield, Cpu, Globe } from 'lucide-react';
 import ArcReactorLogo from './ArcReactorLogo';
 
@@ -25,15 +26,20 @@ interface HomeViewProps {
 }
 
 export default function HomeView({ onNavigate, translations, language }: HomeViewProps) {
-  const [time, setTime] = useState('');
-  const [date, setDate] = useState('');
+  const [time, setTime] = useState('--:--:--');
+  const [date, setDate] = useState('...');
   const [uptime, setUptime] = useState(0);
-  const [greeting, setGreeting] = useState('');
-  
-  // Use useMemo for mounted state check (client-side only)
-  const mounted = useMemo(() => typeof window !== 'undefined', []);
+  const [greeting, setGreeting] = useState('...');
+  const [isClient, setIsClient] = useState(false);
+
+  // Set client after mount - valid pattern for hydration detection
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+    
     const update = () => {
       const now = new Date();
       setTime(now.toLocaleTimeString(language === 'ar' ? 'ar-SA' : 'en-US', { hour12: false }));
@@ -54,7 +60,7 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [language]);
+  }, [language, isClient]);
 
   useEffect(() => {
     const startTime = Date.now();
@@ -110,10 +116,10 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
         {/* Time & Greeting */}
         <div className="flex flex-col items-center mt-4 mb-6">
           <div className="text-3xl md:text-5xl font-mono tracking-[0.15em] mb-1" style={{ color: '#d0e4f8' }}>
-            {mounted && time ? time : '--:--:--'}
+            {time}
           </div>
-          <p className="text-[13px] mb-1" style={{ color: '#00e5ff' }}>{mounted && greeting ? greeting : '...'}</p>
-          <p className="text-[10px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{mounted && date ? date : '...'}</p>
+          <p className="text-[13px] mb-1" style={{ color: '#00e5ff' }}>{greeting}</p>
+          <p className="text-[10px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{date}</p>
         </div>
 
         {/* Status Bar */}

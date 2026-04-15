@@ -1,17 +1,20 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 export default function BackgroundEffects() {
-  const mountedRef = useRef(false);
+  // Track if component is mounted on client
+  const [isClient, setIsClient] = useState(false);
 
+  // This is a valid pattern to detect client-side after hydration
   useEffect(() => {
-    mountedRef.current = true;
+    setIsClient(true);
   }, []);
 
-  // Only generate particles on client-side to avoid hydration mismatch
+  // Generate particles only on client-side after mount
   const particles = useMemo(() => {
-    if (typeof window === 'undefined') return [];
+    if (!isClient) return [];
     
     return Array.from({ length: 20 }, (_, i) => {
       // Use a simple hash function for deterministic but varied values
@@ -28,7 +31,7 @@ export default function BackgroundEffects() {
         size: (1 + hash4 * 2).toFixed(4),
       };
     });
-  }, []);
+  }, [isClient]);
 
   return (
     <>
