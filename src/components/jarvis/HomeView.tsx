@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { MessageSquare, Camera, Video, Mic, Presentation, Images, Settings, Sparkles, Zap, Shield, Cpu, Globe } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { MessageSquare, Camera, Video, Mic, Presentation, Images, Sparkles, Zap, Shield, Cpu, Globe } from 'lucide-react';
 import ArcReactorLogo from './ArcReactorLogo';
 
 interface HomeViewProps {
@@ -29,11 +29,9 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
   const [date, setDate] = useState('');
   const [uptime, setUptime] = useState(0);
   const [greeting, setGreeting] = useState('');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  
+  // Use useMemo for mounted state check (client-side only)
+  const mounted = useMemo(() => typeof window !== 'undefined', []);
 
   useEffect(() => {
     const update = () => {
@@ -112,10 +110,10 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
         {/* Time & Greeting */}
         <div className="flex flex-col items-center mt-4 mb-6">
           <div className="text-3xl md:text-5xl font-mono tracking-[0.15em] mb-1" style={{ color: '#d0e4f8' }}>
-            {mounted ? time : '--:--:--'}
+            {mounted && time ? time : '--:--:--'}
           </div>
-          <p className="text-[13px] mb-1" style={{ color: '#00e5ff' }}>{mounted ? greeting : '...'}</p>
-          <p className="text-[10px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{mounted ? date : '...'}</p>
+          <p className="text-[13px] mb-1" style={{ color: '#00e5ff' }}>{mounted && greeting ? greeting : '...'}</p>
+          <p className="text-[10px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{mounted && date ? date : '...'}</p>
         </div>
 
         {/* Status Bar */}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MessageSquare, Camera, Video, Presentation } from 'lucide-react';
 
 interface ReactorCoreProps {
@@ -21,11 +21,9 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
   const [date, setDate] = useState('');
   const [uptime, setUptime] = useState(0);
   const [greeting, setGreeting] = useState('');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  
+  // Use useMemo for mounted state check (client-side only)
+  const mounted = useMemo(() => typeof window !== 'undefined', []);
 
   useEffect(() => {
     const update = () => {
@@ -107,13 +105,13 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
       {/* Time */}
       <div className="flex flex-col items-center gap-1.5 jarvis-animate-fade-in jarvis-delay-200">
         <div className="text-2xl md:text-4xl font-mono tracking-[0.15em]" style={{ color: '#d0e4f8' }}>
-          {mounted ? time : '--:--:--'}
+          {mounted && time ? time : '--:--:--'}
         </div>
         <p className="text-[11px] jarvis-cursor-blink" style={{ color: '#90a8cc' }}>
-          {mounted ? greeting : '...'}
+          {mounted && greeting ? greeting : '...'}
         </p>
         <p className="text-[9px] tracking-wider" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
-          {mounted ? date : '...'}
+          {mounted && date ? date : '...'}
         </p>
       </div>
 

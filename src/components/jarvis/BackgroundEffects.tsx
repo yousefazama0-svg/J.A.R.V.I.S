@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 export default function BackgroundEffects() {
-  const [mounted, setMounted] = useState(false);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
-    setMounted(true);
+    mountedRef.current = true;
   }, []);
 
   // Only generate particles on client-side to avoid hydration mismatch
   const particles = useMemo(() => {
-    if (!mounted) return [];
+    if (typeof window === 'undefined') return [];
     
     return Array.from({ length: 20 }, (_, i) => {
       // Use a simple hash function for deterministic but varied values
@@ -28,7 +28,7 @@ export default function BackgroundEffects() {
         size: (1 + hash4 * 2).toFixed(4),
       };
     });
-  }, [mounted]);
+  }, []);
 
   return (
     <>

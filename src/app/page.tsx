@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   MessageSquare,
   Camera,
@@ -473,19 +473,28 @@ export default function Home() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   
   const [navigationData, setNavigationData] = useState<{ prompt?: string; topic?: string } | undefined>();
+  
+  // Use ref to track if we've loaded from localStorage
+  const loadedRef = useRef(false);
 
-  // Load saved preferences after mount (client-side only)
+  // Load saved preferences after mount (client-side only) - deferred to avoid sync setState in effect
   useEffect(() => {
-    try {
-      const savedLang = localStorage.getItem('jarvis-language');
-      if (savedLang === 'en' || savedLang === 'ar') {
-        setLanguage(savedLang);
-      }
-      const savedUser = localStorage.getItem('jarvis-user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-    } catch { /* ignore */ }
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+    
+    // Use queueMicrotask to defer setState outside of the effect
+    queueMicrotask(() => {
+      try {
+        const savedLang = localStorage.getItem('jarvis-language');
+        if (savedLang === 'en' || savedLang === 'ar') {
+          setLanguage(savedLang);
+        }
+        const savedUser = localStorage.getItem('jarvis-user');
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        }
+      } catch { /* ignore */ }
+    });
   }, []);
 
   const t = TRANSLATIONS[language];
