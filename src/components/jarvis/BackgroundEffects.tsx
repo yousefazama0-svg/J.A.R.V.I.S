@@ -1,17 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-
-// Deterministic pseudo-random function based on index (same result on server & client)
-const seededRandom = (seed: number): number => {
-  const x = Math.sin(seed * 12.9898 + seed * 78.233) * 43758.5453;
-  return x - Math.floor(x);
-};
-
-// Format number to fixed decimal places for consistent string representation
-const formatNumber = (num: number, decimals: number = 4): string => {
-  return num.toFixed(decimals);
-};
+import React, { useEffect, useState, useMemo } from 'react';
 
 export default function BackgroundEffects() {
   const [mounted, setMounted] = useState(false);
@@ -20,22 +9,26 @@ export default function BackgroundEffects() {
     setMounted(true);
   }, []);
 
-  // Pre-generate deterministic particles with fixed decimal precision
-  // This ensures server and client generate identical values
-  const particles = Array.from({ length: 20 }, (_, i) => {
-    const leftVal = seededRandom(i) * 100;
-    const durationVal = 8 + seededRandom(i + 100) * 12;
-    const delayVal = seededRandom(i + 200) * 10;
-    const sizeVal = 1 + seededRandom(i + 300) * 2;
+  // Only generate particles on client-side to avoid hydration mismatch
+  const particles = useMemo(() => {
+    if (!mounted) return [];
     
-    return {
-      id: i,
-      left: `${formatNumber(leftVal, 4)}%`,
-      duration: `${formatNumber(durationVal, 4)}s`,
-      delay: `${formatNumber(delayVal, 5)}s`,
-      size: formatNumber(sizeVal, 4),
-    };
-  });
+    return Array.from({ length: 20 }, (_, i) => {
+      // Use a simple hash function for deterministic but varied values
+      const hash1 = ((i * 2654435761) % 10000) / 10000;
+      const hash2 = ((i * 2654435761 + 1000) % 10000) / 10000;
+      const hash3 = ((i * 2654435761 + 2000) % 10000) / 10000;
+      const hash4 = ((i * 2654435761 + 3000) % 10000) / 10000;
+      
+      return {
+        id: i,
+        left: (hash1 * 100).toFixed(4),
+        duration: (8 + hash2 * 12).toFixed(4),
+        delay: (hash3 * 10).toFixed(5),
+        size: (1 + hash4 * 2).toFixed(4),
+      };
+    });
+  }, [mounted]);
 
   return (
     <>
@@ -47,12 +40,12 @@ export default function BackgroundEffects() {
             key={p.id}
             className="jarvis-particle"
             style={{
-              left: p.left,
+              left: `${p.left}%`,
               width: `${p.size}px`,
               height: `${p.size}px`,
-              animationDuration: p.duration,
-              animationDelay: p.delay,
-              opacity: 0, // Always start at 0, animate via CSS
+              animationDuration: `${p.duration}s`,
+              animationDelay: `${p.delay}s`,
+              opacity: 0,
             }}
           />
         ))}
