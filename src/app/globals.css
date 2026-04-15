@@ -188,12 +188,27 @@ body {
   border-bottom-right-radius: 12px;
 }
 
-/* ===== JARVIS REACTOR ===== */
+/* ===== JARVIS REACTOR - TONY STARK STYLE ===== */
 .jarvis-reactor {
   position: relative;
-  width: 180px;
-  height: 180px;
+  width: 220px;
+  height: 220px;
   margin: 0 auto;
+  filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.15));
+}
+
+/* Outer energy field */
+.jarvis-reactor::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 240, 255, 0.05) 0%,
+    transparent 70%
+  );
+  animation: jarvis-energy-field 4s ease-in-out infinite;
 }
 
 .jarvis-reactor-ring {
@@ -202,100 +217,224 @@ body {
   border: 1px solid rgba(0, 229, 255, 0.15);
 }
 
+/* Ring 1 - Outermost rotating ring with segments */
 .jarvis-reactor-ring-1 {
   inset: 0;
-  border-color: rgba(0, 229, 255, 0.08);
-  animation: jarvis-rotate 20s linear infinite;
-  background: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    rgba(0, 229, 255, 0.06) 60deg,
-    transparent 120deg,
-    rgba(124, 92, 255, 0.04) 180deg,
-    transparent 240deg,
-    rgba(0, 229, 255, 0.06) 300deg,
-    transparent 360deg
-  );
-}
-
-.jarvis-reactor-ring-2 {
-  inset: 15px;
-  border-color: rgba(0, 229, 255, 0.12);
-  animation: jarvis-rotate-reverse 15s linear infinite;
-  border-top-color: rgba(0, 229, 255, 0.5);
-  border-bottom-color: rgba(124, 92, 255, 0.3);
-}
-
-.jarvis-reactor-ring-3 {
-  inset: 30px;
-  border-color: rgba(0, 229, 255, 0.08);
+  border: 2px solid transparent;
   animation: jarvis-rotate 12s linear infinite;
-  background: conic-gradient(
-    from 45deg,
-    transparent 0deg,
-    rgba(0, 240, 255, 0.1) 90deg,
-    transparent 180deg,
-    rgba(168, 85, 247, 0.08) 270deg,
-    transparent 360deg
-  );
+  background: 
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(0, 229, 255, 0.3) 20deg,
+      transparent 40deg,
+      transparent 50deg,
+      rgba(124, 92, 255, 0.2) 70deg,
+      transparent 90deg,
+      transparent 100deg,
+      rgba(0, 229, 255, 0.25) 120deg,
+      transparent 140deg,
+      transparent 150deg,
+      rgba(168, 85, 247, 0.15) 170deg,
+      transparent 190deg,
+      transparent 200deg,
+      rgba(0, 229, 255, 0.3) 220deg,
+      transparent 240deg,
+      transparent 250deg,
+      rgba(124, 92, 255, 0.2) 270deg,
+      transparent 290deg,
+      transparent 300deg,
+      rgba(0, 229, 255, 0.25) 320deg,
+      transparent 340deg,
+      transparent 360deg
+    );
+  mask: radial-gradient(circle, transparent 85%, black 86%, black 100%);
+  -webkit-mask: radial-gradient(circle, transparent 85%, black 86%, black 100%);
 }
 
-.jarvis-reactor-ring-4 {
-  inset: 48px;
-  border: 1.5px solid rgba(0, 229, 255, 0.2);
+/* Ring 2 - Pulsing segmented ring */
+.jarvis-reactor-ring-2 {
+  inset: 18px;
+  border: 3px solid transparent;
   animation: jarvis-rotate-reverse 8s linear infinite;
-  border-left-color: rgba(0, 229, 255, 0.6);
-  border-right-color: rgba(124, 92, 255, 0.4);
+  background: 
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(0, 229, 255, 0.6) 0deg 15deg,
+      transparent 15deg 30deg
+    );
+  mask: radial-gradient(circle, transparent 80%, black 82%, black 98%, transparent 100%);
+  -webkit-mask: radial-gradient(circle, transparent 80%, black 82%, black 98%, transparent 100%);
+  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.4));
 }
 
+/* Ring 3 - Inner rotating energy ring */
+.jarvis-reactor-ring-3 {
+  inset: 38px;
+  border: 2px solid transparent;
+  animation: jarvis-rotate 6s linear infinite;
+  background: 
+    conic-gradient(
+      from 45deg,
+      rgba(0, 240, 255, 0.8) 0deg,
+      transparent 30deg,
+      transparent 90deg,
+      rgba(124, 92, 255, 0.6) 120deg,
+      transparent 150deg,
+      transparent 210deg,
+      rgba(0, 240, 255, 0.7) 240deg,
+      transparent 270deg,
+      transparent 330deg,
+      rgba(168, 85, 247, 0.5) 350deg,
+      transparent 360deg
+    );
+  mask: radial-gradient(circle, transparent 75%, black 78%, black 95%, transparent 100%);
+  -webkit-mask: radial-gradient(circle, transparent 75%, black 78%, black 95%, transparent 100%);
+  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.5));
+}
+
+/* Ring 4 - Core frame ring */
+.jarvis-reactor-ring-4 {
+  inset: 55px;
+  border: 4px solid rgba(0, 229, 255, 0.4);
+  animation: jarvis-rotate-reverse 4s linear infinite;
+  box-shadow: 
+    0 0 15px rgba(0, 240, 255, 0.3),
+    inset 0 0 15px rgba(0, 240, 255, 0.1);
+}
+
+/* Ring 4 decorative segments */
+.jarvis-reactor-ring-4::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: 
+    conic-gradient(
+      from 0deg,
+      rgba(0, 240, 255, 1) 0deg 10deg,
+      transparent 10deg 80deg,
+      rgba(124, 92, 255, 0.8) 90deg 100deg,
+      transparent 100deg 170deg,
+      rgba(0, 240, 255, 0.9) 180deg 190deg,
+      transparent 190deg 260deg,
+      rgba(168, 85, 247, 0.7) 270deg 280deg,
+      transparent 280deg 360deg
+    );
+  mask: radial-gradient(circle, transparent 70%, black 75%, black 95%, transparent 100%);
+  -webkit-mask: radial-gradient(circle, transparent 70%, black 75%, black 95%, transparent 100%);
+}
+
+/* Core - Main energy center */
 .jarvis-reactor-core {
   position: absolute;
-  inset: 60px;
+  inset: 70px;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(0, 240, 255, 0.15) 0%,
-    rgba(0, 229, 255, 0.05) 50%,
-    transparent 70%
-  );
-  border: 1px solid rgba(0, 229, 255, 0.25);
-  animation: jarvis-pulse-glow 3s ease-in-out infinite;
+  background: 
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(0, 240, 255, 0.8) 15%,
+      rgba(0, 229, 255, 0.4) 40%,
+      rgba(0, 229, 255, 0.1) 60%,
+      transparent 80%
+    );
+  border: 2px solid rgba(0, 240, 255, 0.6);
+  animation: jarvis-pulse-glow-enhanced 2s ease-in-out infinite;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 
+    0 0 30px rgba(0, 240, 255, 0.6),
+    0 0 60px rgba(0, 240, 255, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
+/* Inner core - bright center */
 .jarvis-reactor-core-inner {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: radial-gradient(circle, #00f0ff, rgba(0, 229, 255, 0.5));
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5), 0 0 30px rgba(0, 240, 255, 0.2);
-  animation: jarvis-pulse-core 2s ease-in-out infinite;
+  background: 
+    radial-gradient(
+      circle,
+      #ffffff 0%,
+      rgba(0, 255, 255, 0.95) 30%,
+      rgba(0, 240, 255, 0.7) 60%,
+      rgba(0, 229, 255, 0.3) 100%
+    );
+  box-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.8),
+    0 0 40px rgba(0, 240, 255, 0.6),
+    0 0 60px rgba(0, 240, 255, 0.4),
+    0 0 80px rgba(0, 240, 255, 0.2);
+  animation: jarvis-pulse-core-enhanced 1.5s ease-in-out infinite;
 }
 
-/* ===== JARVIS ORBITING DOTS ===== */
+/* Core inner highlight */
+.jarvis-reactor-core-inner::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 3px;
+  left: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  filter: blur(2px);
+}
+
+/* ===== JARVIS ORBITING PARTICLES - ENHANCED ===== */
 .jarvis-orbit-dot {
   position: absolute;
-  width: 4px;
-  height: 4px;
   border-radius: 50%;
-  background: #00f0ff;
-  box-shadow: 0 0 6px rgba(0, 240, 255, 0.6);
 }
 
 .jarvis-orbit-dot-1 {
-  animation: jarvis-orbit-1 6s linear infinite;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #ffffff, #00f0ff);
+  box-shadow: 
+    0 0 10px rgba(0, 240, 255, 0.8),
+    0 0 20px rgba(0, 240, 255, 0.4);
+  animation: jarvis-orbit-1 5s linear infinite;
 }
+
 .jarvis-orbit-dot-2 {
-  animation: jarvis-orbit-2 8s linear infinite;
-  background: #7c5cff;
-  box-shadow: 0 0 6px rgba(124, 92, 255, 0.6);
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #ffffff, #7c5cff);
+  box-shadow: 
+    0 0 10px rgba(124, 92, 255, 0.8),
+    0 0 20px rgba(124, 92, 255, 0.4);
+  animation: jarvis-orbit-2 7s linear infinite;
 }
+
 .jarvis-orbit-dot-3 {
-  animation: jarvis-orbit-3 10s linear infinite;
-  background: #a855f7;
-  box-shadow: 0 0 6px rgba(168, 85, 247, 0.6);
+  width: 5px;
+  height: 5px;
+  background: radial-gradient(circle, #ffffff, #a855f7);
+  box-shadow: 
+    0 0 8px rgba(168, 85, 247, 0.8),
+    0 0 16px rgba(168, 85, 247, 0.4);
+  animation: jarvis-orbit-3 9s linear infinite;
+}
+
+/* Energy trails for orbiting particles */
+.jarvis-orbit-dot-1::after,
+.jarvis-orbit-dot-2::after,
+.jarvis-orbit-dot-3::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 2px;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent, currentColor);
+  opacity: 0.5;
+  border-radius: 2px;
 }
 
 /* ===== JARVIS DATA FLOW LINE ===== */
@@ -617,6 +756,56 @@ body {
   to { transform: rotate(0deg); }
 }
 
+@keyframes jarvis-pulse-glow-enhanced {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px rgba(0, 240, 255, 0.6),
+      0 0 60px rgba(0, 240, 255, 0.3),
+      inset 0 0 20px rgba(255, 255, 255, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(0, 240, 255, 0.8),
+      0 0 80px rgba(0, 240, 255, 0.4),
+      0 0 120px rgba(0, 240, 255, 0.2),
+      inset 0 0 30px rgba(255, 255, 255, 0.3);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes jarvis-pulse-core-enhanced {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 0 20px rgba(255, 255, 255, 0.8),
+      0 0 40px rgba(0, 240, 255, 0.6),
+      0 0 60px rgba(0, 240, 255, 0.4),
+      0 0 80px rgba(0, 240, 255, 0.2);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 30px rgba(255, 255, 255, 1),
+      0 0 50px rgba(0, 240, 255, 0.8),
+      0 0 80px rgba(0, 240, 255, 0.5),
+      0 0 100px rgba(0, 240, 255, 0.3);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes jarvis-energy-field {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
 @keyframes jarvis-pulse-glow {
   0%, 100% {
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 10px rgba(0, 240, 255, 0.05);
@@ -638,18 +827,18 @@ body {
 }
 
 @keyframes jarvis-orbit-1 {
-  from { transform: rotate(0deg) translateX(50px) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
+  from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
 }
 
 @keyframes jarvis-orbit-2 {
-  from { transform: rotate(120deg) translateX(42px) rotate(-120deg); }
-  to { transform: rotate(480deg) translateX(42px) rotate(-480deg); }
+  from { transform: rotate(120deg) translateX(50px) rotate(-120deg); }
+  to { transform: rotate(480deg) translateX(50px) rotate(-480deg); }
 }
 
 @keyframes jarvis-orbit-3 {
-  from { transform: rotate(240deg) translateX(58px) rotate(-240deg); }
-  to { transform: rotate(600deg) translateX(58px) rotate(-600deg); }
+  from { transform: rotate(240deg) translateX(70px) rotate(-240deg); }
+  to { transform: rotate(600deg) translateX(70px) rotate(-600deg); }
 }
 
 @keyframes jarvis-data-sweep {

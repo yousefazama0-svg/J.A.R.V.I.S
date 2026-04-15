@@ -122,31 +122,41 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
       </div>
 
       {/* Reactor HUD Card */}
-      <div className="jarvis-hud-card p-4 md:p-6 w-full max-w-[360px] jarvis-animate-slide-up jarvis-delay-300">
+      <div className="jarvis-hud-card p-4 md:p-6 w-full max-w-[400px] jarvis-animate-slide-up jarvis-delay-300">
         {/* Top data flow line */}
         <div className="jarvis-data-flow mb-4 rounded-full" />
 
-        {/* Reactor */}
-        <div className="jarvis-reactor my-4">
+        {/* Enhanced Reactor - Tony Stark Style */}
+        <div className="jarvis-reactor my-6">
+          {/* Outer rotating ring 1 */}
           <div className="jarvis-reactor-ring jarvis-reactor-ring-1" />
+          
+          {/* Segmented ring 2 */}
           <div className="jarvis-reactor-ring jarvis-reactor-ring-2" />
+          
+          {/* Energy ring 3 */}
           <div className="jarvis-reactor-ring jarvis-reactor-ring-3" />
+          
+          {/* Core frame ring 4 */}
           <div className="jarvis-reactor-ring jarvis-reactor-ring-4" />
+          
+          {/* Main core */}
           <div className="jarvis-reactor-core">
             <div className="jarvis-reactor-core-inner" />
           </div>
-          {/* Orbiting dots */}
+          
+          {/* Orbiting particles with enhanced effects */}
           <div className="jarvis-orbit-dot jarvis-orbit-dot-1" style={{ top: '50%', left: '50%' }} />
           <div className="jarvis-orbit-dot jarvis-orbit-dot-2" style={{ top: '50%', left: '50%' }} />
           <div className="jarvis-orbit-dot jarvis-orbit-dot-3" style={{ top: '50%', left: '50%' }} />
         </div>
 
         {/* Rotating status text */}
-        <div className="flex justify-center -mt-1 mb-3">
-          <div className="relative w-[200px] h-[20px] overflow-hidden">
+        <div className="flex justify-center -mt-2 mb-4">
+          <div className="relative w-[240px] h-[20px] overflow-hidden">
             <div className="jarvis-rotating-text flex items-center justify-center text-[7px] tracking-[0.3em] uppercase whitespace-nowrap"
-              style={{ color: 'rgba(0, 229, 255, 0.4)' }}>
-              <span>SYSTEM • ACTIVE • READY • SYSTEM • ACTIVE • READY • SYSTEM • ACTIVE • READY •</span>
+              style={{ color: 'rgba(0, 229, 255, 0.5)' }}>
+              <span>ARC REACTOR • ONLINE • POWER STABLE • ARC REACTOR • ONLINE • POWER STABLE • ARC REACTOR • ONLINE • POWER STABLE •</span>
             </div>
           </div>
         </div>
@@ -174,7 +184,7 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
         {/* Session uptime */}
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-[8px] tracking-wider uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{translations.session}</span>
-          <span className="text-[11px] tracking-wider" style={{ color: '#d0e4f8' }}>{formatUptime(uptime)}</span>
+          <span className="text-[11px] tracking-wider font-mono" style={{ color: '#00e5ff' }}>{formatUptime(uptime)}</span>
         </div>
 
         {/* Quick Actions */}
@@ -195,7 +205,7 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
         <div className="grid grid-cols-2 gap-2">
           {capabilities.map((cap, idx) => (
             <div key={idx} className="jarvis-capability">
-              <div className="w-2 h-2 rounded-full" style={{ background: cap.color, boxShadow: `0 0 4px ${cap.color}40` }} />
+              <div className="w-2 h-2 rounded-full" style={{ background: cap.color, boxShadow: `0 0 6px ${cap.color}60` }} />
               <span style={{ color: '#d0e4f8' }}>{cap.label}</span>
             </div>
           ))}
