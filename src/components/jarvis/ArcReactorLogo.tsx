@@ -9,33 +9,33 @@ interface ArcReactorLogoProps {
 }
 
 /**
- * Iron Man Arc Reactor Logo - Ultimate Edition
- * A breathtaking, movie-accurate arc reactor with ultra-smooth dynamic animations
- * Features rotating rings, energy particles, and pulsating core
+ * JARVIS Arc Reactor Logo - Advanced Tech Edition
+ * A stunning, futuristic arc reactor with dynamic animations
+ * Inspired by Stark Industries technology
  */
 export default function ArcReactorLogo({ size = 40, className = '', showText = false }: ArcReactorLogoProps) {
   return (
     <div className={`relative flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
-      {/* Outer Energy Field */}
+      {/* Outer Plasma Field */}
       <div 
         className="absolute rounded-full"
         style={{
-          width: size + 16,
-          height: size + 16,
-          background: 'radial-gradient(circle, rgba(0, 200, 255, 0.3) 0%, rgba(0, 150, 255, 0.15) 40%, transparent 70%)',
-          animation: 'arc-logo-glow 2.5s ease-in-out infinite',
-          filter: 'blur(3px)'
+          width: size + 20,
+          height: size + 20,
+          background: 'radial-gradient(circle, rgba(0, 230, 255, 0.35) 0%, rgba(0, 180, 255, 0.15) 40%, transparent 70%)',
+          animation: 'logo-plasma-pulse 2.5s ease-in-out infinite',
+          filter: 'blur(4px)'
         }}
       />
       
-      {/* Secondary Glow */}
+      {/* Energy Field */}
       <div 
         className="absolute rounded-full"
         style={{
-          width: size + 8,
-          height: size + 8,
-          background: 'radial-gradient(circle, rgba(0, 230, 255, 0.2) 0%, transparent 60%)',
-          animation: 'arc-logo-pulse 2s ease-in-out infinite 0.5s'
+          width: size + 10,
+          height: size + 10,
+          background: 'radial-gradient(circle, rgba(0, 255, 255, 0.25) 0%, transparent 60%)',
+          animation: 'logo-energy-field 2s ease-in-out infinite'
         }}
       />
       
@@ -45,44 +45,45 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
         height={size} 
         viewBox="0 0 100 100" 
         className="absolute"
-        style={{ filter: 'drop-shadow(0 0 10px rgba(0, 220, 255, 0.6))' }}
+        style={{ filter: 'drop-shadow(0 0 12px rgba(0, 240, 255, 0.7))' }}
       >
         <defs>
-          {/* Core Gradients */}
-          <radialGradient id="arcLogoCore" cx="35%" cy="35%" r="65%">
+          {/* Core Gradient */}
+          <radialGradient id="logoCoreGrad" cx="35%" cy="35%" r="65%">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="20%" stopColor="#e0faff" />
-            <stop offset="40%" stopColor="#00f0ff" />
-            <stop offset="60%" stopColor="#00d4e8" />
-            <stop offset="80%" stopColor="#00a8c6" />
-            <stop offset="100%" stopColor="#007a9e" />
+            <stop offset="20%" stopColor="#e0ffff" />
+            <stop offset="40%" stopColor="#00ffff" />
+            <stop offset="60%" stopColor="#00e5ff" />
+            <stop offset="80%" stopColor="#00bcd4" />
+            <stop offset="100%" stopColor="#0097a7" />
           </radialGradient>
           
-          <radialGradient id="arcLogoGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255, 255, 255, 0.95)" />
-            <stop offset="30%" stopColor="rgba(0, 240, 255, 0.6)" />
-            <stop offset="60%" stopColor="rgba(0, 200, 230, 0.3)" />
+          {/* Glow Gradient */}
+          <radialGradient id="logoGlowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(255, 255, 255, 1)" />
+            <stop offset="35%" stopColor="rgba(0, 255, 255, 0.7)" />
+            <stop offset="65%" stopColor="rgba(0, 230, 255, 0.35)" />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
           
-          {/* Segment Gradient */}
-          <linearGradient id="arcLogoSegment" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00f0ff" />
-            <stop offset="50%" stopColor="#00d4e8" />
-            <stop offset="100%" stopColor="#00b8d4" />
+          {/* Ring Gradient */}
+          <linearGradient id="logoRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#00ffff" />
+            <stop offset="50%" stopColor="#00e5ff" />
+            <stop offset="100%" stopColor="#00bcd4" />
           </linearGradient>
           
           {/* Glow Filters */}
-          <filter id="arcLogoFilter" x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur stdDeviation="1.2" result="blur" />
+          <filter id="logoGlow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
           
-          <filter id="arcLogoStrongFilter" x="-150%" y="-150%" width="400%" height="400%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <filter id="logoStrongGlow" x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="blur" />
@@ -91,85 +92,103 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
           </filter>
         </defs>
         
-        {/* Decorative Outer Ring */}
-        <circle
-          cx="50"
-          cy="50"
-          r="48"
-          fill="none"
-          stroke="rgba(0, 200, 255, 0.15)"
-          strokeWidth="0.5"
-          style={{ animation: 'arc-logo-ring-pulse 3s ease-in-out infinite' }}
-        />
-        
-        {/* ========== OUTER RING - 10 Triangular Segments ========== */}
-        <g style={{ transformOrigin: '50px 50px', animation: 'arc-logo-rotate-slow 18s linear infinite' }}>
-          {[...Array(10)].map((_, i) => (
-            <React.Fragment key={`outer-${i}`}>
-              <path
-                d="M 50 4 L 53 12 L 47 12 Z"
-                fill="url(#arcLogoSegment)"
-                transform={`rotate(${i * 36}, 50, 50)`}
-                filter="url(#arcLogoFilter)"
-                style={{ opacity: 0.85 }}
-              />
-            </React.Fragment>
+        {/* ========== OUTER RING - Rotating Segments ========== */}
+        <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-slow 20s linear infinite' }}>
+          {/* Outer ring segments */}
+          {[...Array(8)].map((_, i) => (
+            <circle
+              key={`outer-seg-${i}`}
+              cx={50 + 44 * Math.cos((i * 45) * Math.PI / 180)}
+              cy={50 + 44 * Math.sin((i * 45) * Math.PI / 180)}
+              r="3"
+              fill="none"
+              stroke="url(#logoRingGrad)"
+              strokeWidth="1.5"
+              filter="url(#logoGlow)"
+              style={{ opacity: 0.8 }}
+            />
+          ))}
+          {/* Connecting arcs */}
+          {[...Array(8)].map((_, i) => (
+            <path
+              key={`outer-arc-${i}`}
+              d={`M ${50 + 44 * Math.cos((i * 45 - 15) * Math.PI / 180)} ${50 + 44 * Math.sin((i * 45 - 15) * Math.PI / 180)} A 44 44 0 0 1 ${50 + 44 * Math.cos((i * 45 + 15) * Math.PI / 180)} ${50 + 44 * Math.sin((i * 45 + 15) * Math.PI / 180)}`}
+              fill="none"
+              stroke="rgba(0, 240, 255, 0.6)"
+              strokeWidth="1"
+              filter="url(#logoGlow)"
+            />
           ))}
         </g>
         
-        {/* ========== MIDDLE RING - Counter Rotating ========== */}
-        <g style={{ transformOrigin: '50px 50px', animation: 'arc-logo-rotate-reverse 14s linear infinite' }}>
+        {/* ========== SECOND RING - Counter Rotating ========== */}
+        <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-reverse 15s linear infinite' }}>
           <circle
             cx="50"
             cy="50"
-            r="38"
+            r="36"
             fill="none"
-            stroke="rgba(0, 200, 255, 0.25)"
+            stroke="rgba(0, 230, 255, 0.3)"
             strokeWidth="1"
           />
-          {[...Array(10)].map((_, i) => (
+          {/* Energy nodes */}
+          {[...Array(6)].map((_, i) => (
+            <circle
+              key={`mid-node-${i}`}
+              cx={50 + 36 * Math.cos((i * 60) * Math.PI / 180)}
+              cy={50 + 36 * Math.sin((i * 60) * Math.PI / 180)}
+              r="2.5"
+              fill="rgba(0, 255, 255, 0.9)"
+              filter="url(#logoGlow)"
+            />
+          ))}
+          {/* Energy arcs */}
+          {[...Array(6)].map((_, i) => (
             <path
-              key={`mid-${i}`}
-              d="M 50 12 L 52 18 L 48 18 Z"
-              fill="rgba(0, 240, 255, 0.9)"
-              transform={`rotate(${i * 36 + 18}, 50, 50)`}
-              filter="url(#arcLogoFilter)"
+              key={`mid-arc-${i}`}
+              d={`M ${50 + 36 * Math.cos((i * 60 + 10) * Math.PI / 180)} ${50 + 36 * Math.sin((i * 60 + 10) * Math.PI / 180)} A 36 36 0 0 1 ${50 + 36 * Math.cos((i * 60 + 50) * Math.PI / 180)} ${50 + 36 * Math.sin((i * 60 + 50) * Math.PI / 180)}`}
+              fill="none"
+              stroke="rgba(0, 255, 255, 0.7)"
+              strokeWidth="2"
+              filter="url(#logoGlow)"
             />
           ))}
         </g>
         
         {/* ========== INNER RING - Fast Rotation ========== */}
-        <g style={{ transformOrigin: '50px 50px', animation: 'arc-logo-rotate 10s linear infinite' }}>
+        <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-fast 10s linear infinite' }}>
           <circle
             cx="50"
             cy="50"
-            r="28"
+            r="26"
             fill="none"
-            stroke="rgba(0, 220, 255, 0.4)"
+            stroke="rgba(0, 240, 255, 0.4)"
             strokeWidth="1.5"
-            filter="url(#arcLogoFilter)"
+            filter="url(#logoGlow)"
           />
-          {[...Array(10)].map((_, i) => (
-            <path
-              key={`inner-${i}`}
-              d="M 50 22 L 51.5 27 L 48.5 27 Z"
-              fill="rgba(0, 250, 255, 0.95)"
-              transform={`rotate(${i * 36}, 50, 50)`}
-              filter="url(#arcLogoFilter)"
+          {/* Small energy dots */}
+          {[...Array(12)].map((_, i) => (
+            <circle
+              key={`inner-dot-${i}`}
+              cx={50 + 26 * Math.cos((i * 30) * Math.PI / 180)}
+              cy={50 + 26 * Math.sin((i * 30) * Math.PI / 180)}
+              r="1.5"
+              fill="rgba(0, 255, 255, 0.95)"
+              filter="url(#logoGlow)"
             />
           ))}
         </g>
         
-        {/* ========== CORE FRAME RING ========== */}
+        {/* ========== CORE FRAME ========== */}
         <circle
           cx="50"
           cy="50"
           r="18"
           fill="none"
-          stroke="rgba(0, 230, 255, 0.6)"
+          stroke="rgba(0, 255, 255, 0.6)"
           strokeWidth="2"
-          filter="url(#arcLogoFilter)"
-          style={{ animation: 'arc-logo-core-ring 2s ease-in-out infinite' }}
+          filter="url(#logoGlow)"
+          style={{ animation: 'logo-core-pulse 1.8s ease-in-out infinite' }}
         />
         
         {/* ========== CORE OUTER GLOW ========== */}
@@ -177,8 +196,8 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
           cx="50"
           cy="50"
           r="14"
-          fill="url(#arcLogoGlow)"
-          style={{ animation: 'arc-logo-core-glow 2s ease-in-out infinite' }}
+          fill="url(#logoGlowGrad)"
+          style={{ animation: 'logo-core-glow 2s ease-in-out infinite' }}
         />
         
         {/* ========== MAIN CORE ========== */}
@@ -186,9 +205,9 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
           cx="50"
           cy="50"
           r="10"
-          fill="url(#arcLogoCore)"
-          filter="url(#arcLogoStrongFilter)"
-          style={{ animation: 'arc-logo-core-pulse 1.5s ease-in-out infinite' }}
+          fill="url(#logoCoreGrad)"
+          filter="url(#logoStrongGlow)"
+          style={{ animation: 'logo-core-main-pulse 1.5s ease-in-out infinite' }}
         />
         
         {/* ========== CORE CENTER ========== */}
@@ -197,53 +216,53 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
           cy="50"
           r="5"
           fill="#ffffff"
-          filter="url(#arcLogoStrongFilter)"
+          filter="url(#logoStrongGlow)"
         />
         
         {/* ========== CORE HIGHLIGHT ========== */}
         <circle
           cx="47"
           cy="47"
-          r="2.5"
-          fill="rgba(255, 255, 255, 0.95)"
+          r="2"
+          fill="rgba(255, 255, 255, 0.98)"
           style={{ filter: 'blur(0.5px)' }}
         />
         
         {/* ========== ORBITING ENERGY PARTICLES ========== */}
-        <g style={{ transformOrigin: '50px 50px', animation: 'arc-logo-rotate 5s linear infinite' }}>
+        <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-fast 5s linear infinite' }}>
           <circle 
             cx="50" 
-            cy="5" 
+            cy="6" 
+            r="2.5" 
+            fill="#ffffff" 
+            filter="url(#logoStrongGlow)"
+          />
+        </g>
+        <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-reverse 7s linear infinite' }}>
+          <circle 
+            cx="94" 
+            cy="50" 
             r="2" 
             fill="#ffffff" 
-            filter="url(#arcLogoStrongFilter)"
+            filter="url(#logoStrongGlow)"
           />
         </g>
-        <g style={{ transformOrigin: '50px 50px', animation: 'arc-logo-rotate-reverse 7s linear infinite' }}>
-          <circle 
-            cx="95" 
-            cy="50" 
-            r="1.5" 
-            fill="#ffffff" 
-            filter="url(#arcLogoStrongFilter)"
-          />
-        </g>
-        <g style={{ transformOrigin: '50px 50px', animation: 'arc-logo-rotate 9s linear infinite' }}>
+        <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-fast 9s linear infinite' }}>
           <circle 
             cx="50" 
-            cy="95" 
-            r="1.5" 
+            cy="94" 
+            r="2" 
             fill="#ffffff" 
-            filter="url(#arcLogoStrongFilter)"
+            filter="url(#logoStrongGlow)"
           />
         </g>
-        <g style={{ transformOrigin: '50px 50px', animation: 'arc-logo-rotate-reverse 11s linear infinite' }}>
+        <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-reverse 11s linear infinite' }}>
           <circle 
-            cx="5" 
+            cx="6" 
             cy="50" 
             r="1.5" 
             fill="#ffffff" 
-            filter="url(#arcLogoStrongFilter)"
+            filter="url(#logoStrongGlow)"
           />
         </g>
       </svg>
@@ -251,7 +270,7 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
       {/* Text label if needed */}
       {showText && (
         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
-          <span className="text-[8px] tracking-widest uppercase font-bold" style={{ color: '#00d4e8' }}>
+          <span className="text-[8px] tracking-widest uppercase font-bold" style={{ color: '#00e5ff' }}>
             JARVIS
           </span>
         </div>
@@ -259,10 +278,21 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
       
       {/* Embedded CSS Animations */}
       <style jsx>{`
-        @keyframes arc-logo-glow {
+        @keyframes logo-plasma-pulse {
           0%, 100% { 
             opacity: 0.6; 
             transform: scale(1); 
+          }
+          50% { 
+            opacity: 1; 
+            transform: scale(1.1); 
+          }
+        }
+        
+        @keyframes logo-energy-field {
+          0%, 100% { 
+            opacity: 0.5; 
+            transform: scale(0.95); 
           }
           50% { 
             opacity: 1; 
@@ -270,57 +300,33 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
           }
         }
         
-        @keyframes arc-logo-pulse {
-          0%, 100% { 
-            opacity: 0.5; 
-            transform: scale(0.95); 
-          }
-          50% { 
-            opacity: 0.9; 
-            transform: scale(1.05); 
-          }
-        }
-        
-        @keyframes arc-logo-ring-pulse {
-          0%, 100% { 
-            opacity: 0.15; 
-            stroke-width: 0.5;
-          }
-          50% { 
-            opacity: 0.3; 
-            stroke-width: 0.8;
-          }
-        }
-        
-        @keyframes arc-logo-rotate-slow {
+        @keyframes logo-rotate-slow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
         
-        @keyframes arc-logo-rotate-reverse {
+        @keyframes logo-rotate-reverse {
           from { transform: rotate(360deg); }
           to { transform: rotate(0deg); }
         }
         
-        @keyframes arc-logo-rotate {
+        @keyframes logo-rotate-fast {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
         
-        @keyframes arc-logo-core-ring {
+        @keyframes logo-core-pulse {
           0%, 100% { 
             opacity: 0.6; 
             stroke-width: 2;
-            stroke: 'rgba(0, 230, 255, 0.6)';
           }
           50% { 
             opacity: 1; 
-            stroke-width: 2.5;
-            stroke: 'rgba(0, 250, 255, 0.8)';
+            stroke-width: 3;
           }
         }
         
-        @keyframes arc-logo-core-glow {
+        @keyframes logo-core-glow {
           0%, 100% { 
             opacity: 0.7; 
             transform: scale(1); 
@@ -331,14 +337,14 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
           }
         }
         
-        @keyframes arc-logo-core-pulse {
+        @keyframes logo-core-main-pulse {
           0%, 100% { 
             opacity: 0.95; 
             transform: scale(1); 
           }
           50% { 
             opacity: 1; 
-            transform: scale(1.05); 
+            transform: scale(1.06); 
           }
         }
       `}</style>

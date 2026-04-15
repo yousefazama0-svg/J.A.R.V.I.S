@@ -20,8 +20,9 @@ interface ReactorCoreProps {
 const emptySubscribe = () => () => {};
 
 /**
- * Iron Man Arc Reactor Core - Ultimate Edition
- * A breathtaking arc reactor with cinematic dynamic animations
+ * JARVIS Arc Reactor Core - Advanced Tech Edition
+ * A stunning arc reactor with cinematic dynamic animations
+ * No triangles - only circular tech-inspired design
  */
 export default function ReactorCore({ translations, language }: ReactorCoreProps) {
   // Use useSyncExternalStore to detect client-side rendering
@@ -88,15 +89,15 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
   ];
 
   const capabilities = language === 'ar' ? [
-    { label: 'توليد AI', color: '#00f5ff' },
-    { label: 'مساعد صوتي', color: '#00d4e8' },
-    { label: 'إجراءات ذكية', color: '#00b8d4' },
-    { label: 'تحميل الكل', color: '#0098b8' },
+    { label: 'توليد AI', color: '#00ffff' },
+    { label: 'مساعد صوتي', color: '#00e5ff' },
+    { label: 'إجراءات ذكية', color: '#00bcd4' },
+    { label: 'تحميل الكل', color: '#0097a7' },
   ] : [
-    { label: 'AI Generation', color: '#00f5ff' },
-    { label: 'Voice Assistant', color: '#00d4e8' },
-    { label: 'Smart Actions', color: '#00b8d4' },
-    { label: 'Download All', color: '#0098b8' },
+    { label: 'AI Generation', color: '#00ffff' },
+    { label: 'Voice Assistant', color: '#00e5ff' },
+    { label: 'Smart Actions', color: '#00bcd4' },
+    { label: 'Download All', color: '#0097a7' },
   ];
 
   return (
@@ -132,41 +133,41 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
         {/* Top data flow line */}
         <div className="jarvis-data-flow mb-4 rounded-full" />
 
-        {/* Iron Man Arc Reactor - Ultimate Edition */}
-        <div className="ironman-reactor my-6">
-          {/* Outer Plasma Glow */}
-          <div className="reactor-plasma-outer" />
+        {/* JARVIS Arc Reactor - Tech Edition */}
+        <div className="jarvis-tech-reactor my-6">
+          {/* Plasma Glow */}
+          <div className="reactor-plasma" />
           
           {/* Main Reactor SVG */}
-          <svg viewBox="0 0 220 220" className="reactor-svg-main">
+          <svg viewBox="0 0 220 220" className="reactor-svg-tech">
             <defs>
-              <radialGradient id="coreGradUltimate" cx="35%" cy="35%" r="65%">
+              <radialGradient id="techCoreGrad" cx="35%" cy="35%" r="65%">
                 <stop offset="0%" stopColor="#ffffff" />
                 <stop offset="15%" stopColor="#e8ffff" />
-                <stop offset="30%" stopColor="#00f5ff" />
-                <stop offset="50%" stopColor="#00d8e8" />
-                <stop offset="70%" stopColor="#00b8d0" />
-                <stop offset="100%" stopColor="#0088a0" />
+                <stop offset="30%" stopColor="#00ffff" />
+                <stop offset="50%" stopColor="#00e5ff" />
+                <stop offset="70%" stopColor="#00bcd4" />
+                <stop offset="100%" stopColor="#0097a7" />
               </radialGradient>
-              <radialGradient id="coreGlowUltimate" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
-                <stop offset="30%" stopColor="rgba(0,245,255,0.6)" />
-                <stop offset="60%" stopColor="rgba(0,200,220,0.3)" />
+              <radialGradient id="techGlowGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(255,255,255,1)" />
+                <stop offset="30%" stopColor="rgba(0,255,255,0.7)" />
+                <stop offset="60%" stopColor="rgba(0,230,255,0.35)" />
                 <stop offset="100%" stopColor="transparent" />
               </radialGradient>
-              <linearGradient id="segmentGradUltimate" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#00f5ff" />
-                <stop offset="50%" stopColor="#00d8e8" />
-                <stop offset="100%" stopColor="#00b8d0" />
+              <linearGradient id="techRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00ffff" />
+                <stop offset="50%" stopColor="#00e5ff" />
+                <stop offset="100%" stopColor="#00bcd4" />
               </linearGradient>
-              <filter id="glowUltimate" x="-60%" y="-60%" width="220%" height="220%">
-                <feGaussianBlur stdDeviation="1.5" result="blur" />
+              <filter id="techGlow" x="-70%" y="-70%" width="240%" height="240%">
+                <feGaussianBlur stdDeviation="1.8" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <filter id="strongGlowUltimate" x="-150%" y="-150%" width="400%" height="400%">
+              <filter id="techStrongGlow" x="-150%" y="-150%" width="400%" height="400%">
                 <feGaussianBlur stdDeviation="4" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
@@ -176,116 +177,146 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
               </filter>
             </defs>
             
-            {/* Outer Ring - 10 Segments */}
-            <g className="reactor-ring-outer" style={{ transformOrigin: '110px 110px' }}>
-              {[...Array(10)].map((_, i) => (
+            {/* Outer Ring - Energy Nodes */}
+            <g className="tech-ring-outer" style={{ transformOrigin: '110px 110px' }}>
+              {[...Array(8)].map((_, i) => (
+                <React.Fragment key={`outer-${i}`}>
+                  <circle
+                    cx={110 + 98 * Math.cos((i * 45) * Math.PI / 180)}
+                    cy={110 + 98 * Math.sin((i * 45) * Math.PI / 180)}
+                    r="4"
+                    fill="none"
+                    stroke="url(#techRingGrad)"
+                    strokeWidth="1.5"
+                    filter="url(#techGlow)"
+                  />
+                  <circle
+                    cx={110 + 98 * Math.cos((i * 45) * Math.PI / 180)}
+                    cy={110 + 98 * Math.sin((i * 45) * Math.PI / 180)}
+                    r="1.5"
+                    fill="rgba(0, 255, 255, 0.9)"
+                    filter="url(#techGlow)"
+                  />
+                </React.Fragment>
+              ))}
+              {[...Array(8)].map((_, i) => (
                 <path
-                  key={`outer-${i}`}
-                  d="M 110 8 L 114 22 L 106 22 Z"
-                  fill="url(#segmentGradUltimate)"
-                  transform={`rotate(${i * 36}, 110, 110)`}
-                  filter="url(#glowUltimate)"
-                  style={{ opacity: 0.85 }}
+                  key={`outer-arc-${i}`}
+                  d={`M ${110 + 98 * Math.cos((i * 45 - 10) * Math.PI / 180)} ${110 + 98 * Math.sin((i * 45 - 10) * Math.PI / 180)} A 98 98 0 0 1 ${110 + 98 * Math.cos((i * 45 + 10) * Math.PI / 180)} ${110 + 98 * Math.sin((i * 45 + 10) * Math.PI / 180)}`}
+                  fill="none"
+                  stroke="rgba(0, 240, 255, 0.5)"
+                  strokeWidth="1"
+                  filter="url(#techGlow)"
                 />
               ))}
             </g>
             
-            {/* Second Ring - Counter Rotating */}
-            <g className="reactor-ring-mid" style={{ transformOrigin: '110px 110px' }}>
-              <circle cx="110" cy="110" r="80" fill="none" stroke="rgba(0,200,255,0.25)" strokeWidth="1.5" />
-              {[...Array(10)].map((_, i) => (
+            {/* Second Ring - Counter */}
+            <g className="tech-ring-mid" style={{ transformOrigin: '110px 110px' }}>
+              <circle cx="110" cy="110" r="78" fill="none" stroke="rgba(0, 230, 255, 0.2)" strokeWidth="1.5" />
+              {[...Array(6)].map((_, i) => (
+                <React.Fragment key={`mid-${i}`}>
+                  <circle
+                    cx={110 + 78 * Math.cos((i * 60) * Math.PI / 180)}
+                    cy={110 + 78 * Math.sin((i * 60) * Math.PI / 180)}
+                    r="5"
+                    fill="none"
+                    stroke="url(#techRingGrad)"
+                    strokeWidth="1.5"
+                    filter="url(#techGlow)"
+                  />
+                  <circle
+                    cx={110 + 78 * Math.cos((i * 60) * Math.PI / 180)}
+                    cy={110 + 78 * Math.sin((i * 60) * Math.PI / 180)}
+                    r="2"
+                    fill="rgba(0, 255, 255, 0.85)"
+                    filter="url(#techGlow)"
+                  />
+                </React.Fragment>
+              ))}
+              {[...Array(6)].map((_, i) => (
                 <path
-                  key={`mid-${i}`}
-                  d="M 110 30 L 113 40 L 107 40 Z"
-                  fill="rgba(0, 245, 255, 0.9)"
-                  transform={`rotate(${i * 36 + 18}, 110, 110)`}
-                  filter="url(#glowUltimate)"
+                  key={`mid-arc-${i}`}
+                  d={`M ${110 + 78 * Math.cos((i * 60 + 15) * Math.PI / 180)} ${110 + 78 * Math.sin((i * 60 + 15) * Math.PI / 180)} A 78 78 0 0 1 ${110 + 78 * Math.cos((i * 60 + 45) * Math.PI / 180)} ${110 + 78 * Math.sin((i * 60 + 45) * Math.PI / 180)}`}
+                  fill="none"
+                  stroke="rgba(0, 255, 255, 0.6)"
+                  strokeWidth="2"
+                  filter="url(#techGlow)"
                 />
               ))}
             </g>
             
             {/* Third Ring - Fast */}
-            <g className="reactor-ring-inner" style={{ transformOrigin: '110px 110px' }}>
-              <circle cx="110" cy="110" r="60" fill="none" stroke="rgba(0,210,255,0.35)" strokeWidth="2" filter="url(#glowUltimate)" />
-              {[...Array(10)].map((_, i) => (
-                <path
-                  key={`inner-${i}`}
-                  d="M 110 50 L 112 57 L 108 57 Z"
-                  fill="rgba(0, 255, 255, 0.95)"
-                  transform={`rotate(${i * 36}, 110, 110)`}
-                  filter="url(#glowUltimate)"
+            <g className="tech-ring-inner" style={{ transformOrigin: '110px 110px' }}>
+              <circle cx="110" cy="110" r="58" fill="none" stroke="rgba(0, 240, 255, 0.3)" strokeWidth="2" filter="url(#techGlow)" />
+              {[...Array(12)].map((_, i) => (
+                <circle
+                  key={`inner-dot-${i}`}
+                  cx={110 + 58 * Math.cos((i * 30) * Math.PI / 180)}
+                  cy={110 + 58 * Math.sin((i * 30) * Math.PI / 180)}
+                  r="2"
+                  fill="rgba(0, 255, 255, 0.9)"
+                  filter="url(#techGlow)"
                 />
               ))}
             </g>
             
             {/* Fourth Ring - Counter Fast */}
-            <g className="reactor-ring-fourth" style={{ transformOrigin: '110px 110px' }}>
-              <circle cx="110" cy="110" r="44" fill="none" stroke="rgba(0,230,255,0.45)" strokeWidth="2" filter="url(#glowUltimate)" />
-              {[...Array(20)].map((_, i) => (
-                <path
-                  key={`seg-${i}`}
-                  d="M 110 66 L 111 70 L 109 70 Z"
-                  fill="rgba(0, 255, 255, 0.9)"
-                  transform={`rotate(${i * 18}, 110, 110)`}
-                  filter="url(#glowUltimate)"
+            <g className="tech-ring-fourth" style={{ transformOrigin: '110px 110px' }}>
+              <circle cx="110" cy="110" r="42" fill="none" stroke="rgba(0, 240, 255, 0.4)" strokeWidth="2" filter="url(#techGlow)" />
+              {[...Array(18)].map((_, i) => (
+                <circle
+                  key={`tiny-${i}`}
+                  cx={110 + 42 * Math.cos((i * 20) * Math.PI / 180)}
+                  cy={110 + 42 * Math.sin((i * 20) * Math.PI / 180)}
+                  r="1.5"
+                  fill="rgba(0, 255, 255, 0.95)"
+                  filter="url(#techGlow)"
                 />
               ))}
             </g>
             
-            {/* Core Frame Ring */}
-            <circle 
-              cx="110" 
-              cy="110" 
-              r="32" 
-              fill="none" 
-              stroke="rgba(0,245,255,0.6)" 
-              strokeWidth="2.5" 
-              className="reactor-core-frame"
-              filter="url(#glowUltimate)" 
-            />
+            {/* Hexagonal Core Frame */}
+            <g className="tech-hex-frame" style={{ transformOrigin: '110px 110px' }}>
+              <polygon
+                points={Array.from({ length: 6 }, (_, i) => {
+                  const angle = (i * 60 - 90) * Math.PI / 180;
+                  return `${110 + 28 * Math.cos(angle)},${110 + 28 * Math.sin(angle)}`;
+                }).join(' ')}
+                fill="none"
+                stroke="rgba(0, 255, 255, 0.6)"
+                strokeWidth="2"
+                filter="url(#techGlow)"
+              />
+            </g>
             
-            {/* Core Outer Glow */}
-            <circle cx="110" cy="110" r="26" fill="url(#coreGlowUltimate)" className="reactor-core-glow-anim" />
+            {/* Core Glow */}
+            <circle cx="110" cy="110" r="22" fill="url(#techGlowGrad)" className="tech-core-glow" />
             
             {/* Main Core */}
-            <circle 
-              cx="110" 
-              cy="110" 
-              r="20" 
-              fill="url(#coreGradUltimate)" 
-              filter="url(#strongGlowUltimate)" 
-              className="reactor-core-pulse-anim"
-            />
+            <circle cx="110" cy="110" r="16" fill="url(#techCoreGrad)" filter="url(#techStrongGlow)" className="tech-core-pulse" />
             
             {/* Core Inner Ring */}
-            <circle 
-              cx="110" 
-              cy="110" 
-              r="12" 
-              fill="none" 
-              stroke="rgba(255,255,255,0.3)" 
-              strokeWidth="1"
-              className="reactor-core-inner-ring"
-            />
+            <circle cx="110" cy="110" r="10" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" className="tech-inner-ring" />
             
             {/* Core Center */}
-            <circle cx="110" cy="110" r="8" fill="#ffffff" filter="url(#strongGlowUltimate)" />
+            <circle cx="110" cy="110" r="6" fill="#ffffff" filter="url(#techStrongGlow)" />
             
             {/* Core Highlight */}
-            <circle cx="107" cy="107" r="3" fill="rgba(255,255,255,0.95)" style={{ filter: 'blur(0.5px)' }} />
+            <circle cx="107" cy="107" r="2.5" fill="rgba(255,255,255,0.95)" style={{ filter: 'blur(0.5px)' }} />
             
             {/* Orbiting Particles */}
-            <g className="reactor-particle-1" style={{ transformOrigin: '110px 110px' }}>
-              <circle cx="110" cy="10" r="2.5" fill="#ffffff" filter="url(#strongGlowUltimate)" />
+            <g className="tech-particle-1" style={{ transformOrigin: '110px 110px' }}>
+              <circle cx="110" cy="12" r="2.5" fill="#ffffff" filter="url(#techStrongGlow)" />
             </g>
-            <g className="reactor-particle-2" style={{ transformOrigin: '110px 110px' }}>
-              <circle cx="210" cy="110" r="2" fill="#ffffff" filter="url(#strongGlowUltimate)" />
+            <g className="tech-particle-2" style={{ transformOrigin: '110px 110px' }}>
+              <circle cx="208" cy="110" r="2" fill="#ffffff" filter="url(#techStrongGlow)" />
             </g>
-            <g className="reactor-particle-3" style={{ transformOrigin: '110px 110px' }}>
-              <circle cx="110" cy="210" r="2" fill="#ffffff" filter="url(#strongGlowUltimate)" />
+            <g className="tech-particle-3" style={{ transformOrigin: '110px 110px' }}>
+              <circle cx="110" cy="208" r="2" fill="#ffffff" filter="url(#techStrongGlow)" />
             </g>
-            <g className="reactor-particle-4" style={{ transformOrigin: '110px 110px' }}>
-              <circle cx="10" cy="110" r="1.5" fill="#ffffff" filter="url(#strongGlowUltimate)" />
+            <g className="tech-particle-4" style={{ transformOrigin: '110px 110px' }}>
+              <circle cx="12" cy="110" r="1.5" fill="#ffffff" filter="url(#techStrongGlow)" />
             </g>
           </svg>
         </div>
@@ -294,7 +325,7 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
         <div className="flex justify-center -mt-2 mb-4">
           <div className="relative w-[280px] h-[20px] overflow-hidden">
             <div className="jarvis-rotating-text flex items-center justify-center text-[7px] tracking-[0.3em] uppercase whitespace-nowrap"
-              style={{ color: 'rgba(0, 200, 255, 0.5)' }}>
+              style={{ color: 'rgba(0, 230, 255, 0.5)' }}>
               <span>ARC REACTOR • ONLINE • POWER STABLE • STARK INDUSTRIES • ARC REACTOR • ONLINE • POWER STABLE • STARK INDUSTRIES •</span>
             </div>
           </div>
@@ -302,19 +333,19 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
 
         {/* Status badges */}
         <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
-          <div className="jarvis-badge" style={{ background: 'rgba(0, 245, 255, 0.1)', border: '1px solid rgba(0, 245, 255, 0.2)', color: '#00f5ff' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 255, 255, 0.1)', border: '1px solid rgba(0, 255, 255, 0.2)', color: '#00ffff' }}>
             <MessageSquare size={10} />
             <span>24 msgs</span>
           </div>
-          <div className="jarvis-badge" style={{ background: 'rgba(0, 216, 232, 0.1)', border: '1px solid rgba(0, 216, 232, 0.2)', color: '#00d8e8' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 229, 255, 0.1)', border: '1px solid rgba(0, 229, 255, 0.2)', color: '#00e5ff' }}>
             <Camera size={10} />
             <span>128 images</span>
           </div>
-          <div className="jarvis-badge" style={{ background: 'rgba(0, 184, 212, 0.1)', border: '1px solid rgba(0, 184, 212, 0.2)', color: '#00b8d4' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 188, 212, 0.1)', border: '1px solid rgba(0, 188, 212, 0.2)', color: '#00bcd4' }}>
             <Video size={10} />
             <span>12 videos</span>
           </div>
-          <div className="jarvis-badge" style={{ background: 'rgba(0, 152, 184, 0.1)', border: '1px solid rgba(0, 152, 184, 0.2)', color: '#0098b8' }}>
+          <div className="jarvis-badge" style={{ background: 'rgba(0, 151, 167, 0.1)', border: '1px solid rgba(0, 151, 167, 0.2)', color: '#0097a7' }}>
             <Presentation size={10} />
             <span>8 slides</span>
           </div>
@@ -323,14 +354,14 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
         {/* Session uptime */}
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-[8px] tracking-wider uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>{translations.session}</span>
-          <span className="text-[11px] tracking-wider font-mono" style={{ color: '#00f5ff' }}>{formatUptime(uptime)}</span>
+          <span className="text-[11px] tracking-wider font-mono" style={{ color: '#00ffff' }}>{formatUptime(uptime)}</span>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-4 gap-2 mb-3">
           {quickActions.map((action, idx) => {
             const Icon = action.icon;
-            const colors = ['#00f5ff', '#00d8e8', '#00b8d4', '#0098b8'];
+            const colors = ['#00ffff', '#00e5ff', '#00bcd4', '#0097a7'];
             return (
               <div key={idx} className="jarvis-quick-action" style={{ color: colors[idx] }}>
                 <Icon size={16} />
@@ -356,119 +387,114 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
       
       {/* Embedded Styles for Reactor */}
       <style jsx>{`
-        .ironman-reactor {
+        .jarvis-tech-reactor {
           position: relative;
           width: 220px;
           height: 220px;
           margin: 0 auto;
         }
         
-        .reactor-plasma-outer {
+        .reactor-plasma {
           position: absolute;
-          inset: -15px;
+          inset: -12px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(0, 220, 255, 0.2) 0%, transparent 70%);
-          animation: reactor-plasma-glow 3s ease-in-out infinite;
-          filter: blur(8px);
+          background: radial-gradient(circle, rgba(0, 240, 255, 0.2) 0%, transparent 70%);
+          animation: tech-plasma 3s ease-in-out infinite;
+          filter: blur(10px);
         }
         
-        .reactor-svg-main {
+        .reactor-svg-tech {
           width: 100%;
           height: 100%;
-          filter: drop-shadow(0 0 15px rgba(0, 220, 255, 0.5));
+          filter: drop-shadow(0 0 18px rgba(0, 240, 255, 0.5));
         }
         
-        .reactor-ring-outer {
-          animation: reactor-spin-slow 18s linear infinite;
+        .tech-ring-outer {
+          animation: tech-rotate-slow 18s linear infinite;
         }
         
-        .reactor-ring-mid {
-          animation: reactor-spin-reverse 14s linear infinite;
+        .tech-ring-mid {
+          animation: tech-rotate-reverse 14s linear infinite;
         }
         
-        .reactor-ring-inner {
-          animation: reactor-spin-fast 10s linear infinite;
+        .tech-ring-inner {
+          animation: tech-rotate-fast 10s linear infinite;
         }
         
-        .reactor-ring-fourth {
-          animation: reactor-spin-reverse-fast 7s linear infinite;
+        .tech-ring-fourth {
+          animation: tech-rotate-reverse-fast 7s linear infinite;
         }
         
-        .reactor-core-frame {
-          animation: reactor-core-frame-pulse 1.8s ease-in-out infinite;
+        .tech-hex-frame {
+          animation: tech-rotate-reverse 5s linear infinite;
         }
         
-        .reactor-core-glow-anim {
-          animation: reactor-core-glow 2s ease-in-out infinite;
+        .tech-core-glow {
+          animation: tech-core-glow 2s ease-in-out infinite;
         }
         
-        .reactor-core-pulse-anim {
-          animation: reactor-core-pulse 1.5s ease-in-out infinite;
+        .tech-core-pulse {
+          animation: tech-core-pulse 1.5s ease-in-out infinite;
         }
         
-        .reactor-core-inner-ring {
-          animation: reactor-inner-ring-pulse 1.2s ease-in-out infinite;
+        .tech-inner-ring {
+          animation: tech-inner-ring 1.2s ease-in-out infinite;
         }
         
-        .reactor-particle-1 {
-          animation: reactor-spin-fast 5s linear infinite;
+        .tech-particle-1 {
+          animation: tech-rotate-fast 5s linear infinite;
         }
         
-        .reactor-particle-2 {
-          animation: reactor-spin-reverse 7s linear infinite;
+        .tech-particle-2 {
+          animation: tech-rotate-reverse 7s linear infinite;
         }
         
-        .reactor-particle-3 {
-          animation: reactor-spin-fast 9s linear infinite;
+        .tech-particle-3 {
+          animation: tech-rotate-fast 9s linear infinite;
         }
         
-        .reactor-particle-4 {
-          animation: reactor-spin-reverse 11s linear infinite;
+        .tech-particle-4 {
+          animation: tech-rotate-reverse 11s linear infinite;
         }
         
-        @keyframes reactor-plasma-glow {
+        @keyframes tech-plasma {
           0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.1); }
-        }
-        
-        @keyframes reactor-spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes reactor-spin-reverse {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        
-        @keyframes reactor-spin-fast {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes reactor-spin-reverse-fast {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        
-        @keyframes reactor-core-frame-pulse {
-          0%, 100% { opacity: 0.6; stroke-width: 2.5; }
-          50% { opacity: 1; stroke-width: 3.5; }
-        }
-        
-        @keyframes reactor-core-glow {
-          0%, 100% { opacity: 0.7; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.12); }
         }
         
-        @keyframes reactor-core-pulse {
-          0%, 100% { opacity: 0.95; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.05); }
+        @keyframes tech-rotate-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         
-        @keyframes reactor-inner-ring-pulse {
+        @keyframes tech-rotate-reverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        
+        @keyframes tech-rotate-fast {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @keyframes tech-rotate-reverse-fast {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        
+        @keyframes tech-core-glow {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.15); }
+        }
+        
+        @keyframes tech-core-pulse {
+          0%, 100% { opacity: 0.95; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.06); }
+        }
+        
+        @keyframes tech-inner-ring {
           0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.1); }
+          50% { opacity: 0.6; transform: scale(1.12); }
         }
       `}</style>
     </div>
