@@ -583,7 +583,7 @@ export default function ChatView({ onNavigate, translations, language }: ChatVie
         </div>
 
         {/* Input row */}
-        <div className="jarvis-chat-input flex items-end gap-2 p-2">
+        <div className="jarvis-chat-input flex items-center gap-2 p-2">
           {/* Upload button (decorative) */}
           <button className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-colors hover:bg-[#0e1a3a]">
             <Upload size={14} style={{ color: '#90a8cc' }} />
@@ -597,7 +597,7 @@ export default function ChatView({ onNavigate, translations, language }: ChatVie
             onKeyDown={handleKeyDown}
             placeholder={translations.placeholder}
             rows={1}
-            className="flex-1 bg-transparent text-[12px] outline-none placeholder-[#90a8cc]/40 resize-none leading-relaxed"
+            className="flex-1 bg-transparent text-[12px] outline-none placeholder-[#90a8cc]/40 resize-none leading-relaxed py-2"
             style={{ color: '#d0e4f8', maxHeight: '120px', fontFamily: 'inherit', direction: language === 'ar' ? 'rtl' : 'ltr' }}
           />
 
