@@ -15,6 +15,12 @@ import {
   Wand,
   ImagePlus,
   FileImage,
+  Palette,
+  Layers,
+  Sun,
+  Contrast,
+  Droplets,
+  Focus,
 } from 'lucide-react';
 
 interface GeneratedImage {
@@ -36,7 +42,11 @@ type ImageSize =
   | '1440x720'
   | '720x1440'
   | '1920x1080'
-  | '1080x1920';
+  | '1080x1920'
+  | '1536x1024'
+  | '1024x1536'
+  | '1792x1024'
+  | '1024x1792';
 
 type ImageStyle =
   | 'Realistic'
@@ -48,7 +58,29 @@ type ImageStyle =
   | 'Oil Painting'
   | 'Digital Art'
   | 'Sketch'
-  | 'Pixel Art';
+  | 'Pixel Art'
+  | 'Photorealistic'
+  | 'Fantasy'
+  | 'Sci-Fi'
+  | 'Horror'
+  | 'Romance'
+  | 'Noir'
+  | 'Vintage'
+  | 'Modern'
+  | 'Abstract'
+  | 'Surrealism'
+  | 'Impressionism'
+  | 'Pop Art'
+  | 'Minimalist'
+  | 'Gothic'
+  | 'Steampunk'
+  | 'Cyberpunk'
+  | 'Retro'
+  | 'Neon'
+  | 'Pastel'
+  | 'Monochrome'
+  | 'HDR'
+  | 'Panorama';
 
 type ImageMode = 'generate' | 'enhance';
 
@@ -60,14 +92,32 @@ const SIZE_OPTIONS: { value: ImageSize; label: string; icon: string }[] = [
   { value: '864x1152', label: '3:4 Portrait', icon: '▰' },
   { value: '1440x720', label: '2:1 Ultra Wide', icon: '▬' },
   { value: '720x1440', label: '1:2 Ultra Tall', icon: '▬' },
-  { value: '1920x1080', label: 'Full HD', icon: ' widescreen' },
-  { value: '1080x1920', label: 'HD Portrait', icon: ' mobile' },
+  { value: '1920x1080', label: 'Full HD 16:9', icon: '🖥' },
+  { value: '1080x1920', label: 'HD Portrait', icon: '📱' },
+  { value: '1536x1024', label: '3:2 Classic', icon: '▮' },
+  { value: '1024x1536', label: '2:3 Classic', icon: '▮' },
+  { value: '1792x1024', label: '7:4 Cinematic', icon: '🎬' },
+  { value: '1024x1792', label: '4:7 Poster', icon: '🖼' },
 ];
 
-const STYLE_OPTIONS: ImageStyle[] = [
-  'Realistic', 'Artistic', 'Cinematic', 'Anime', '3D Render',
-  'Watercolor', 'Oil Painting', 'Digital Art', 'Sketch', 'Pixel Art'
-];
+const STYLE_CATEGORIES = {
+  'Photography': ['Realistic', 'Photorealistic', 'HDR', 'Panorama', 'Cinematic', 'Noir', 'Vintage', 'Modern'],
+  'Art Styles': ['Artistic', 'Watercolor', 'Oil Painting', 'Impressionism', 'Surrealism', 'Abstract', 'Pop Art', 'Minimalist'],
+  'Digital': ['Digital Art', 'Anime', '3D Render', 'Pixel Art', 'Cyberpunk', 'Steampunk', 'Neon', 'Retro'],
+  'Themes': ['Fantasy', 'Sci-Fi', 'Horror', 'Romance', 'Gothic', 'Pastel', 'Monochrome'],
+  'Other': ['Sketch', 'Portrait', 'Landscape', 'Macro'],
+};
+
+const ALL_STYLES: ImageStyle[] = Object.values(STYLE_CATEGORIES).flat() as ImageStyle[];
+
+// Enhancement options
+interface EnhancementOptions {
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  sharpness: number;
+  denoise: number;
+}
 
 interface PhotoViewProps {
   initialPrompt?: string;
@@ -113,6 +163,7 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
   const [prompt, setPrompt] = useState('');
   const [selectedSize, setSelectedSize] = useState<ImageSize>('1024x1024');
   const [selectedStyle, setSelectedStyle] = useState<ImageStyle>('Realistic');
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof STYLE_CATEGORIES>('Photography');
   const [isGenerating, setIsGenerating] = useState(false);
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [recentPrompts, setRecentPrompts] = useState<string[]>([]);
@@ -122,6 +173,14 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [enhanceQuality, setEnhanceQuality] = useState<'medium' | 'high' | 'ultra'>('high');
   const [showDownloadDropdown, setShowDownloadDropdown] = useState<number | null>(null);
+  const [enhancementOptions, setEnhancementOptions] = useState<EnhancementOptions>({
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+    sharpness: 100,
+    denoise: 0,
+  });
+  const [showAdvancedEnhance, setShowAdvancedEnhance] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -249,6 +308,7 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
         body: JSON.stringify({
           image: uploadedImage,
           quality: enhanceQuality,
+          options: enhancementOptions,
         }),
       });
 
@@ -292,7 +352,7 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
       setIsGenerating(false);
       setUploadedImage(null);
     }
-  }, [uploadedImage, enhanceQuality, isGenerating]);
+  }, [uploadedImage, enhanceQuality, enhancementOptions, isGenerating]);
 
   const downloadImage = useCallback((image: GeneratedImage, format: 'png' | 'jpg' | 'webp' = 'png') => {
     try {
@@ -446,7 +506,7 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
                 {translations.size}
               </span>
               <div className="flex flex-wrap gap-1.5">
-                {SIZE_OPTIONS.slice(0, 7).map(opt => (
+                {SIZE_OPTIONS.map(opt => (
                   <button
                     key={opt.value}
                     onClick={() => setSelectedSize(opt.value)}
@@ -470,16 +530,45 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
               </div>
             </div>
 
-            {/* Style selector */}
-            <div className="flex items-start gap-2 mb-3">
-              <span className="text-[9px] tracking-[0.12em] uppercase shrink-0 pt-1" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
-                {translations.style}
-              </span>
+            {/* Style Categories */}
+            <div className="mb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Palette size={10} style={{ color: '#a855f7' }} />
+                <span className="text-[9px] tracking-[0.12em] uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                  {language === 'ar' ? 'الفئات' : 'Categories'}
+                </span>
+              </div>
               <div className="flex flex-wrap gap-1.5">
-                {STYLE_OPTIONS.map(s => (
+                {(Object.keys(STYLE_CATEGORIES) as Array<keyof typeof STYLE_CATEGORIES>).map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className="px-2 py-1 rounded-md text-[9px] transition-all"
+                    style={{
+                      background: selectedCategory === cat ? 'rgba(168, 85, 247, 0.15)' : 'rgba(168, 85, 247, 0.04)',
+                      border: `1px solid ${selectedCategory === cat ? 'rgba(168, 85, 247, 0.3)' : 'rgba(168, 85, 247, 0.1)'}`,
+                      color: selectedCategory === cat ? '#a855f7' : '#90a8cc',
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Style selector */}
+            <div className="mb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Layers size={10} style={{ color: '#00e5ff' }} />
+                <span className="text-[9px] tracking-[0.12em] uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                  {translations.style}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {STYLE_CATEGORIES[selectedCategory].map(s => (
                   <button
                     key={s}
-                    onClick={() => setSelectedStyle(s)}
+                    onClick={() => setSelectedStyle(s as ImageStyle)}
                     className="px-2 py-1 rounded-md text-[9px] transition-all active:scale-95"
                     style={{
                       background: selectedStyle === s ? 'rgba(0, 229, 255, 0.12)' : 'rgba(0, 229, 255, 0.04)',
@@ -577,7 +666,7 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
               </button>
             )}
 
-            {/* Quality selector */}
+            {/* Quality and Enhancement options */}
             {uploadedImage && (
               <>
                 <div className="flex items-center gap-2 mb-3">
@@ -601,6 +690,102 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
                     ))}
                   </div>
                 </div>
+
+                {/* Advanced Enhancement Toggle */}
+                <button
+                  onClick={() => setShowAdvancedEnhance(!showAdvancedEnhance)}
+                  className="flex items-center gap-2 mb-3 text-[9px] transition-all"
+                  style={{ color: '#90a8cc' }}
+                >
+                  <Sun size={10} />
+                  {language === 'ar' ? 'خيارات متقدمة' : 'Advanced Options'}
+                  <span style={{ transform: showAdvancedEnhance ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▼</span>
+                </button>
+
+                {/* Advanced Enhancement Sliders */}
+                {showAdvancedEnhance && (
+                  <div className="grid grid-cols-2 gap-3 mb-3 p-3 rounded-lg" style={{ background: 'rgba(0, 0, 0, 0.2)' }}>
+                    {/* Brightness */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[8px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                          <Sun size={8} className="inline mr-1" />
+                          {language === 'ar' ? 'السطوع' : 'Brightness'}
+                        </span>
+                        <span className="text-[8px] font-mono" style={{ color: '#f59e0b' }}>{enhancementOptions.brightness}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="50"
+                        max="150"
+                        value={enhancementOptions.brightness}
+                        onChange={(e) => setEnhancementOptions(prev => ({ ...prev, brightness: parseInt(e.target.value) }))}
+                        className="w-full h-1 rounded-full appearance-none cursor-pointer"
+                        style={{ background: '#0e1a3a' }}
+                      />
+                    </div>
+
+                    {/* Contrast */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[8px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                          <Contrast size={8} className="inline mr-1" />
+                          {language === 'ar' ? 'التباين' : 'Contrast'}
+                        </span>
+                        <span className="text-[8px] font-mono" style={{ color: '#10b981' }}>{enhancementOptions.contrast}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="50"
+                        max="150"
+                        value={enhancementOptions.contrast}
+                        onChange={(e) => setEnhancementOptions(prev => ({ ...prev, contrast: parseInt(e.target.value) }))}
+                        className="w-full h-1 rounded-full appearance-none cursor-pointer"
+                        style={{ background: '#0e1a3a' }}
+                      />
+                    </div>
+
+                    {/* Saturation */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[8px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                          <Droplets size={8} className="inline mr-1" />
+                          {language === 'ar' ? 'التشبع' : 'Saturation'}
+                        </span>
+                        <span className="text-[8px] font-mono" style={{ color: '#ec4899' }}>{enhancementOptions.saturation}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="200"
+                        value={enhancementOptions.saturation}
+                        onChange={(e) => setEnhancementOptions(prev => ({ ...prev, saturation: parseInt(e.target.value) }))}
+                        className="w-full h-1 rounded-full appearance-none cursor-pointer"
+                        style={{ background: '#0e1a3a' }}
+                      />
+                    </div>
+
+                    {/* Sharpness */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[8px]" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                          <Focus size={8} className="inline mr-1" />
+                          {language === 'ar' ? 'الحدة' : 'Sharpness'}
+                        </span>
+                        <span className="text-[8px] font-mono" style={{ color: '#00e5ff' }}>{enhancementOptions.sharpness}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="200"
+                        value={enhancementOptions.sharpness}
+                        onChange={(e) => setEnhancementOptions(prev => ({ ...prev, sharpness: parseInt(e.target.value) }))}
+                        className="w-full h-1 rounded-full appearance-none cursor-pointer"
+                        style={{ background: '#0e1a3a' }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={enhanceImage}

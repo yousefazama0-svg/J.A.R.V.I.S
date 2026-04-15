@@ -15,6 +15,9 @@ import {
   Wand2,
   Upload,
   Gauge,
+  Layers,
+  Sun,
+  Palette,
 } from 'lucide-react';
 
 interface VideoItem {
@@ -28,13 +31,13 @@ interface VideoItem {
 }
 
 type Duration = '5s' | '10s' | '30s' | '60s' | '120s' | '300s' | '600s' | '900s';
-type VideoStyle = 'Cinematic' | 'Animation' | 'Realistic' | 'Abstract' | '3D Animation' | 'Motion Graphics' | 'Slow Motion' | 'Timelapse' | 'Documentary' | 'Music Video' | 'Noir' | 'Vintage' | 'Sci-Fi' | 'Fantasy' | 'Horror' | 'Comedy' | 'Action' | 'Romance' | 'Nature' | 'Urban';
-type VideoMode = 'generate' | 'enhance';
 type VideoQuality = 'speed' | 'balanced' | 'quality';
+type FPS = '24' | '30' | '60';
+type VideoMode = 'generate' | 'enhance';
 
 const DURATION_OPTIONS: Duration[] = ['5s', '10s', '30s', '60s', '120s', '300s', '600s', '900s'];
-const STYLE_OPTIONS: VideoStyle[] = ['Cinematic', 'Animation', 'Realistic', 'Abstract', '3D Animation', 'Motion Graphics', 'Slow Motion', 'Timelapse', 'Documentary', 'Music Video', 'Noir', 'Vintage', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Action', 'Romance', 'Nature', 'Urban'];
 const QUALITY_OPTIONS: VideoQuality[] = ['speed', 'balanced', 'quality'];
+const FPS_OPTIONS: FPS[] = ['24', '30', '60'];
 
 const DURATION_LABELS: Record<Duration, string> = {
   '5s': '5 sec',
@@ -52,6 +55,25 @@ const QUALITY_LABELS: Record<VideoQuality, string> = {
   'balanced': '⚖️ Balanced',
   'quality': '✨ High Quality',
 };
+
+// Extended style categories
+const STYLE_CATEGORIES = {
+  'Cinematic': ['Cinematic', 'Noir', 'Vintage', 'Documentary', 'Indie Film', 'Blockbuster', 'Art House'],
+  'Animation': ['Animation', '3D Animation', 'Anime', 'Cartoon', 'Stop Motion', 'Claymation', 'Pixel Animation'],
+  'Reality': ['Realistic', 'Nature', 'Urban', 'Lifestyle', 'Travel', 'Sports', 'Fitness'],
+  'Creative': ['Abstract', 'Motion Graphics', 'Surreal', 'Experimental', 'Glitch Art', 'Vaporwave'],
+  'Genre': ['Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Action', 'Romance', 'Thriller'],
+  'Special': ['Slow Motion', 'Timelapse', 'Music Video', 'Commercial', 'Social Media', 'TikTok Style'],
+};
+
+const ALL_STYLES = Object.values(STYLE_CATEGORIES).flat();
+
+// Resolution presets
+const RESOLUTION_OPTIONS = [
+  { value: '720p', label: '720p HD' },
+  { value: '1080p', label: '1080p Full HD' },
+  { value: '4k', label: '4K Ultra HD' },
+];
 
 interface VideoViewProps {
   initialPrompt?: string;
@@ -98,8 +120,11 @@ interface VideoViewProps {
 export default function VideoView({ initialPrompt, translations, language }: VideoViewProps) {
   const [prompt, setPrompt] = useState('');
   const [duration, setDuration] = useState<Duration>('10s');
-  const [style, setStyle] = useState<VideoStyle>('Cinematic');
+  const [style, setStyle] = useState<string>('Cinematic');
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof STYLE_CATEGORIES>('Cinematic');
   const [quality, setQuality] = useState<VideoQuality>('balanced');
+  const [fps, setFps] = useState<FPS>('30');
+  const [resolution, setResolution] = useState('1080p');
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState('');
@@ -109,6 +134,8 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
   const [uploadedVideo, setUploadedVideo] = useState<string | null>(null);
   const [enhanceQuality, setEnhanceQuality] = useState<'medium' | 'high' | 'ultra'>('high');
   const [showDownloadDropdown, setShowDownloadDropdown] = useState<string | null>(null);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -188,7 +215,9 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
     startTimeRef.current = Date.now();
 
     // Progress timer - faster for speed quality
-    const progressMultiplier = quality === 'speed' ? 60000 : quality === 'quality' ? 400000 : 200000;
+    const durationInSeconds = parseInt(duration.replace('s', ''));
+    const baseTime = quality === 'speed' ? 60000 : quality === 'quality' ? 400000 : 200000;
+    const progressMultiplier = baseTime * (durationInSeconds / 10); // Scale with duration
     const progressInterval = setInterval(() => {
       const elapsed = Date.now() - startTimeRef.current;
       const pct = Math.min(95, Math.floor((elapsed / progressMultiplier) * 100));
@@ -201,15 +230,15 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
     }, quality === 'speed' ? 500 : 2000);
 
     try {
-      const durValue = parseInt(duration.replace('s', ''));
       const res = await fetch('/api/video/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           prompt: trimmed, 
-          duration: durValue, 
+          duration: durationInSeconds, 
           style: style.toLowerCase(),
-          quality 
+          quality,
+          fps: parseInt(fps)
         }),
       });
 
@@ -279,7 +308,7 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
       setIsGenerating(false);
       setProgress(0);
     }
-  }, [prompt, duration, style, isGenerating, saveToGallery, translations.processing]);
+  }, [prompt, duration, style, quality, fps, isGenerating, saveToGallery, translations.processing, language]);
 
   const handleVideoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -505,6 +534,32 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
               </div>
             </div>
 
+            {/* Style Categories */}
+            <div className="mb-2.5">
+              <div className="flex items-center gap-2 mb-2">
+                <Palette size={10} style={{ color: '#a855f7' }} />
+                <span className="text-[9px] tracking-[0.12em] uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                  {language === 'ar' ? 'الفئات' : 'Categories'}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {(Object.keys(STYLE_CATEGORIES) as Array<keyof typeof STYLE_CATEGORIES>).map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className="px-2 py-1 rounded-md text-[9px] transition-all"
+                    style={{
+                      background: selectedCategory === cat ? 'rgba(168, 85, 247, 0.15)' : 'rgba(168, 85, 247, 0.04)',
+                      border: `1px solid ${selectedCategory === cat ? 'rgba(168, 85, 247, 0.3)' : 'rgba(168, 85, 247, 0.1)'}`,
+                      color: selectedCategory === cat ? '#a855f7' : '#90a8cc',
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Style selector */}
             <div className="flex items-start gap-2 mb-3">
               <Film size={10} style={{ color: 'rgba(144, 168, 204, 0.5)', marginTop: '4px' }} />
@@ -512,7 +567,7 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
                 {translations.style}
               </span>
               <div className="flex flex-wrap gap-1.5">
-                {STYLE_OPTIONS.map(s => (
+                {STYLE_CATEGORIES[selectedCategory].map(s => (
                   <button
                     key={s}
                     onClick={() => setStyle(s)}
@@ -528,6 +583,68 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
                 ))}
               </div>
             </div>
+
+            {/* Advanced Options Toggle */}
+            <button
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              className="flex items-center gap-2 mb-3 text-[9px] transition-all"
+              style={{ color: '#90a8cc' }}
+            >
+              <Layers size={10} />
+              {language === 'ar' ? 'خيارات متقدمة' : 'Advanced Options'}
+              <span style={{ transform: showAdvancedOptions ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▼</span>
+            </button>
+
+            {/* Advanced Options */}
+            {showAdvancedOptions && (
+              <div className="grid grid-cols-2 gap-3 mb-3 p-3 rounded-lg" style={{ background: 'rgba(0, 0, 0, 0.2)' }}>
+                {/* FPS */}
+                <div>
+                  <span className="text-[9px] tracking-[0.12em] uppercase mb-2 block" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                    {translations.fps}
+                  </span>
+                  <div className="flex gap-1.5">
+                    {FPS_OPTIONS.map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setFps(f as FPS)}
+                        className="px-2 py-1 rounded-md text-[9px] transition-all"
+                        style={{
+                          background: fps === f ? 'rgba(0, 229, 255, 0.15)' : 'rgba(0, 229, 255, 0.04)',
+                          border: `1px solid ${fps === f ? 'rgba(0, 229, 255, 0.3)' : 'rgba(0, 229, 255, 0.1)'}`,
+                          color: fps === f ? '#00e5ff' : '#90a8cc',
+                        }}
+                      >
+                        {f} FPS
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Resolution */}
+                <div>
+                  <span className="text-[9px] tracking-[0.12em] uppercase mb-2 block" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                    {translations.resolution}
+                  </span>
+                  <div className="flex gap-1.5">
+                    {RESOLUTION_OPTIONS.map(r => (
+                      <button
+                        key={r.value}
+                        onClick={() => setResolution(r.value)}
+                        className="px-2 py-1 rounded-md text-[9px] transition-all"
+                        style={{
+                          background: resolution === r.value ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.04)',
+                          border: `1px solid ${resolution === r.value ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.1)'}`,
+                          color: resolution === r.value ? '#10b981' : '#90a8cc',
+                        }}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Generate button */}
             <button
