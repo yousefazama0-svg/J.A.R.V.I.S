@@ -464,29 +464,29 @@ export default function Home() {
   const [prevTab, setPrevTab] = useState<Tab>('home');
   const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // Initialize language from localStorage
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === 'undefined') return 'en';
-    try {
-      const saved = localStorage.getItem('jarvis-language');
-      if (saved === 'en' || saved === 'ar') return saved;
-    } catch { /* ignore */ }
-    return 'en';
-  });
+  // Initialize language - always start with 'en' to avoid hydration mismatch
+  const [language, setLanguage] = useState<Language>('en');
   
-  // User state
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const saved = localStorage.getItem('jarvis-user');
-      if (saved) return JSON.parse(saved);
-    } catch { /* ignore */ }
-    return null;
-  });
+  // User state - always start null to avoid hydration mismatch
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   
   const [navigationData, setNavigationData] = useState<{ prompt?: string; topic?: string } | undefined>();
+
+  // Load saved preferences after mount (client-side only)
+  useEffect(() => {
+    try {
+      const savedLang = localStorage.getItem('jarvis-language');
+      if (savedLang === 'en' || savedLang === 'ar') {
+        setLanguage(savedLang);
+      }
+      const savedUser = localStorage.getItem('jarvis-user');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const t = TRANSLATIONS[language];
 

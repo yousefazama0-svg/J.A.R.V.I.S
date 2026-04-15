@@ -442,14 +442,16 @@ export default function VoiceView({ translations, language }: VoiceViewProps) {
         <div className="mb-6">
           <div className="flex items-center justify-center gap-[3px] h-12">
             {Array.from({ length: 20 }).map((_, i) => {
-              const barHeight = voiceState === 'idle' ? 4 : Math.max(4, Math.sin(i * 0.5 + Date.now() * 0.003) * audioLevel * 32 + 4);
+              // Use audioLevel for dynamic height calculation (client-side only effect via CSS)
+              const baseHeight = 4;
+              const maxAdditionalHeight = audioLevel * 32;
               return (
                 <div
                   key={i}
                   className="rounded-full transition-all duration-100"
                   style={{
                     width: '3px',
-                    height: `${barHeight}px`,
+                    height: voiceState === 'idle' ? baseHeight : baseHeight + maxAdditionalHeight * (0.5 + 0.5 * Math.sin(i * 0.5)),
                     background: current.color,
                     opacity: voiceState === 'idle' ? 0.2 : 0.4 + (i / 20) * 0.6,
                     boxShadow: voiceState !== 'idle' ? `0 0 4px ${current.color}40` : 'none',
