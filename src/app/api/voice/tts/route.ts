@@ -16,28 +16,31 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: "Text is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
+    // Limit text to 1024 characters
+    const limitedText = text.slice(0, 1000);
+
     const zai = await getZAI();
 
     // Use ZAI TTS
-    const ttsResponse = await zai.tts.generate({
-      text: text.slice(0, 1000), // Limit text length
+    const response = await zai.audio.tts.create({
+      input: limitedText,
       voice: voice as any,
-      speed,
+      speed: Math.max(0.5, Math.min(2.0, speed)),
+      response_format: 'wav',
+      stream: false
     });
 
-    if (ttsResponse.audio) {
-      // The audio is already base64 encoded
-      const audioData = ttsResponse.audio;
-      
-      return new Response(Buffer.from(audioData, 'base64'), {
-        status: 200,
-        headers: { 
-          "Content-Type": "audio/wav",
-        }
-      });
-    }
+    // Get array buffer from Response object
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(new Uint8Array(arrayBuffer));
 
-    return new Response(JSON.stringify({ error: "Failed to generate audio" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    return new Response(buffer, {
+      status: 200,
+      headers: { 
+        "Content-Type": "audio/wav",
+        "Content-Length": buffer.length.toString()
+      }
+    });
   } catch (error) {
     console.error("[TTS] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to generate audio";

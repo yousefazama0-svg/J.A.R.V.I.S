@@ -1,6 +1,6 @@
 import ZAI from 'z-ai-web-dev-sdk';
 
-// Initialize ZAI SDK
+// Initialize ZAI SDK singleton
 let zaiInstance: Awaited<ReturnType<typeof ZAI.create>> | null = null;
 
 export async function getZAI() {

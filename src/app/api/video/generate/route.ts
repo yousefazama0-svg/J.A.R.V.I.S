@@ -20,15 +20,17 @@ export async function POST(request: NextRequest) {
     const zai = await getZAI();
 
     // Use ZAI Video Generation
-    const videoResponse = await zai.video.generate({
+    const task = await zai.video.generations.create({
       prompt: `${prompt}, ${style} style`,
-      duration,
+      quality: 'speed',
+      duration: duration === 10 ? 10 : 5,
+      fps: 30
     });
 
-    if (videoResponse.taskId) {
+    if (task.id) {
       return new Response(JSON.stringify({ 
-        videoId: videoResponse.taskId,
-        status: "processing",
+        videoId: task.id,
+        status: task.task_status || "PROCESSING",
         prompt,
         style,
         duration

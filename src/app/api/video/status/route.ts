@@ -12,16 +12,20 @@ export async function GET(request: NextRequest) {
   try {
     const zai = await getZAI();
 
-    // Check video status
-    const statusResponse = await zai.video.getStatus({
-      taskId: videoId,
-    });
+    // Check video status using async result query
+    const result = await zai.async.result.query(videoId);
+
+    // Extract video URL from multiple possible fields
+    const videoUrl = result.video_result?.[0]?.url ||
+                    result.video_url ||
+                    result.url ||
+                    result.video;
 
     return new Response(JSON.stringify({ 
       videoId,
-      status: statusResponse.status,
-      progress: statusResponse.progress || 0,
-      videoUrl: statusResponse.videoUrl,
+      status: result.task_status,
+      progress: result.task_status === 'SUCCESS' ? 100 : result.task_status === 'FAIL' ? 0 : 50,
+      videoUrl: videoUrl || null,
     }), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("[Video Status] Error:", error);

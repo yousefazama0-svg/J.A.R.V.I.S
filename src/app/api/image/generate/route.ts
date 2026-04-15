@@ -19,32 +19,36 @@ export async function POST(request: NextRequest) {
 
     const zai = await getZAI();
 
+    // Map aspect ratios to supported sizes
+    const sizeMap: Record<string, string> = {
+      '1:1': '1024x1024',
+      '16:9': '1344x768',
+      '9:16': '768x1344',
+      '4:3': '1152x864',
+      '3:4': '864x1152',
+    };
+
+    const size = sizeMap[aspectRatio] || '1024x1024';
+
     // Use ZAI Image Generation
-    const imageResponse = await zai.image.generate({
-      prompt: `${prompt}, ${style} style`,
-      size: aspectRatio === '16:9' ? '1024x576' : aspectRatio === '1:1' ? '1024x1024' : '576x1024',
+    const imageResponse = await zai.images.generations.create({
+      prompt: `${prompt}, ${style} style, high quality, detailed`,
+      size: size as any,
     });
 
     const imageData = imageResponse.data?.[0];
     
-    if (imageData?.url) {
-      // Fetch the image and convert to base64
-      const imageFetch = await fetch(imageData.url);
-      const imageBuffer = await imageFetch.arrayBuffer();
-      const base64 = Buffer.from(imageBuffer).toString('base64');
-      
+    if (imageData?.base64) {
       return new Response(JSON.stringify({ 
-        image: `data:image/png;base64,${base64}`,
+        image: `data:image/png;base64,${imageData.base64}`,
         prompt,
-        style
+        style,
+        size
       }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
 
-    // Fallback if no URL
     return new Response(JSON.stringify({ 
-      error: "Failed to generate image",
-      prompt,
-      style
+      error: "Failed to generate image" 
     }), { status: 500, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("[Image Generate] Error:", error);
