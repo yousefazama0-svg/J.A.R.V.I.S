@@ -27,12 +27,14 @@ interface VideoItem {
   isEnhanced?: boolean;
 }
 
-type Duration = '5s' | '10s' | '30s' | '60s' | '120s' | '300s' | '600s';
-type VideoStyle = 'Cinematic' | 'Animation' | 'Realistic' | 'Abstract' | '3D Animation' | 'Motion Graphics' | 'Slow Motion' | 'Timelapse' | 'Documentary' | 'Music Video';
+type Duration = '5s' | '10s' | '30s' | '60s' | '120s' | '300s' | '600s' | '900s';
+type VideoStyle = 'Cinematic' | 'Animation' | 'Realistic' | 'Abstract' | '3D Animation' | 'Motion Graphics' | 'Slow Motion' | 'Timelapse' | 'Documentary' | 'Music Video' | 'Noir' | 'Vintage' | 'Sci-Fi' | 'Fantasy' | 'Horror' | 'Comedy' | 'Action' | 'Romance' | 'Nature' | 'Urban';
 type VideoMode = 'generate' | 'enhance';
+type VideoQuality = 'speed' | 'balanced' | 'quality';
 
-const DURATION_OPTIONS: Duration[] = ['5s', '10s', '30s', '60s', '120s', '300s', '600s'];
-const STYLE_OPTIONS: VideoStyle[] = ['Cinematic', 'Animation', 'Realistic', 'Abstract', '3D Animation', 'Motion Graphics', 'Slow Motion', 'Timelapse', 'Documentary', 'Music Video'];
+const DURATION_OPTIONS: Duration[] = ['5s', '10s', '30s', '60s', '120s', '300s', '600s', '900s'];
+const STYLE_OPTIONS: VideoStyle[] = ['Cinematic', 'Animation', 'Realistic', 'Abstract', '3D Animation', 'Motion Graphics', 'Slow Motion', 'Timelapse', 'Documentary', 'Music Video', 'Noir', 'Vintage', 'Sci-Fi', 'Fantasy', 'Horror', 'Comedy', 'Action', 'Romance', 'Nature', 'Urban'];
+const QUALITY_OPTIONS: VideoQuality[] = ['speed', 'balanced', 'quality'];
 
 const DURATION_LABELS: Record<Duration, string> = {
   '5s': '5 sec',
@@ -42,6 +44,13 @@ const DURATION_LABELS: Record<Duration, string> = {
   '120s': '2 min',
   '300s': '5 min',
   '600s': '10 min',
+  '900s': '15 min',
+};
+
+const QUALITY_LABELS: Record<VideoQuality, string> = {
+  'speed': '⚡ Fast',
+  'balanced': '⚖️ Balanced',
+  'quality': '✨ High Quality',
 };
 
 interface VideoViewProps {
@@ -90,6 +99,7 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
   const [prompt, setPrompt] = useState('');
   const [duration, setDuration] = useState<Duration>('10s');
   const [style, setStyle] = useState<VideoStyle>('Cinematic');
+  const [quality, setQuality] = useState<VideoQuality>('balanced');
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState('');
@@ -177,24 +187,30 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
     setError(null);
     startTimeRef.current = Date.now();
 
-    // Simulated progress timer
+    // Progress timer - faster for speed quality
+    const progressMultiplier = quality === 'speed' ? 60000 : quality === 'quality' ? 400000 : 200000;
     const progressInterval = setInterval(() => {
       const elapsed = Date.now() - startTimeRef.current;
-      const pct = Math.min(95, Math.floor((elapsed / 300000) * 100));
+      const pct = Math.min(95, Math.floor((elapsed / progressMultiplier) * 100));
       setProgress(pct);
-      if (pct < 25) setProgressLabel('Generating... 0%');
-      else if (pct < 50) setProgressLabel('Generating... 25%');
-      else if (pct < 75) setProgressLabel('Generating... 50%');
-      else if (pct < 90) setProgressLabel('Generating... 75%');
-      else setProgressLabel('Generating... 90%');
-    }, 2000);
+      if (pct < 25) setProgressLabel(language === 'ar' ? 'جارٍ الإنشاء... 0%' : 'Generating... 0%');
+      else if (pct < 50) setProgressLabel(language === 'ar' ? 'جارٍ الإنشاء... 25%' : 'Generating... 25%');
+      else if (pct < 75) setProgressLabel(language === 'ar' ? 'جارٍ الإنشاء... 50%' : 'Generating... 50%');
+      else if (pct < 90) setProgressLabel(language === 'ar' ? 'جارٍ الإنشاء... 75%' : 'Generating... 75%');
+      else setProgressLabel(language === 'ar' ? 'جارٍ الإنشاء... 90%' : 'Generating... 90%');
+    }, quality === 'speed' ? 500 : 2000);
 
     try {
       const durValue = parseInt(duration.replace('s', ''));
       const res = await fetch('/api/video/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: trimmed, duration: durValue, style: style.toLowerCase() }),
+        body: JSON.stringify({ 
+          prompt: trimmed, 
+          duration: durValue, 
+          style: style.toLowerCase(),
+          quality 
+        }),
       });
 
       const data = await res.json();
@@ -465,6 +481,30 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
               </div>
             </div>
 
+            {/* Quality selector */}
+            <div className="flex items-start gap-2 mb-2.5">
+              <Gauge size={10} style={{ color: 'rgba(144, 168, 204, 0.5)', marginTop: '4px' }} />
+              <span className="text-[9px] tracking-[0.12em] uppercase shrink-0 pt-1" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
+                {language === 'ar' ? 'الجودة' : 'Quality'}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {QUALITY_OPTIONS.map(q => (
+                  <button
+                    key={q}
+                    onClick={() => setQuality(q)}
+                    className="px-2 py-1 rounded-md text-[9px] transition-all"
+                    style={{
+                      background: quality === q ? 'rgba(124, 92, 255, 0.15)' : 'rgba(124, 92, 255, 0.04)',
+                      border: `1px solid ${quality === q ? 'rgba(124, 92, 255, 0.35)' : 'rgba(124, 92, 255, 0.1)'}`,
+                      color: quality === q ? '#7c5cff' : '#90a8cc',
+                    }}
+                  >
+                    {QUALITY_LABELS[q]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Style selector */}
             <div className="flex items-start gap-2 mb-3">
               <Film size={10} style={{ color: 'rgba(144, 168, 204, 0.5)', marginTop: '4px' }} />
@@ -472,7 +512,7 @@ export default function VideoView({ initialPrompt, translations, language }: Vid
                 {translations.style}
               </span>
               <div className="flex flex-wrap gap-1.5">
-                {STYLE_OPTIONS.slice(0, 6).map(s => (
+                {STYLE_OPTIONS.map(s => (
                   <button
                     key={s}
                     onClick={() => setStyle(s)}
