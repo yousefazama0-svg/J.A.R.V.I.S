@@ -1,14 +1,94 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+
+// Pre-calculated positions for outer ring (12 nodes at radius 245)
+const OUTER_NODES = [
+  { cx: 520, cy: 275 }, { cx: 448, cy: 448 }, { cx: 275, cy: 520 }, { cx: 102, cy: 448 },
+  { cx: 30, cy: 275 }, { cx: 102, cy: 102 }, { cx: 275, cy: 30 }, { cx: 448, cy: 102 },
+  { cx: 491, cy: 152 }, { cx: 398, cy: 470 }, { cx: 152, cy: 470 }, { cx: 59, cy: 152 },
+];
+
+// Pre-calculated positions for mid ring (8 nodes at radius 200)
+const MID_NODES = [
+  { cx: 475, cy: 275 }, { cx: 416, cy: 416 }, { cx: 275, cy: 475 }, { cx: 134, cy: 416 },
+  { cx: 75, cy: 275 }, { cx: 134, cy: 134 }, { cx: 275, cy: 75 }, { cx: 416, cy: 134 },
+];
+
+// Pre-calculated positions for inner ring (16 dots at radius 155)
+const INNER_DOTS = [
+  { cx: 430, cy: 275 }, { cx: 385, cy: 385 }, { cx: 275, cy: 430 }, { cx: 165, cy: 385 },
+  { cx: 120, cy: 275 }, { cx: 165, cy: 165 }, { cx: 275, cy: 120 }, { cx: 385, cy: 165 },
+  { cx: 407, cy: 323 }, { cx: 323, cy: 407 }, { cx: 227, cy: 407 }, { cx: 143, cy: 323 },
+  { cx: 143, cy: 227 }, { cx: 227, cy: 143 }, { cx: 323, cy: 143 }, { cx: 407, cy: 227 },
+];
+
+// Pre-calculated positions for fourth ring (24 dots at radius 110)
+const TINY_DOTS = [
+  { cx: 385, cy: 275 }, { cx: 363, cy: 341 }, { cx: 309, cy: 385 }, { cx: 241, cy: 385 },
+  { cx: 187, cy: 341 }, { cx: 165, cy: 275 }, { cx: 187, cy: 209 }, { cx: 241, cy: 165 },
+  { cx: 309, cy: 165 }, { cx: 363, cy: 209 }, { cx: 377, cy: 297 }, { cx: 340, cy: 365 },
+  { cx: 275, cy: 385 }, { cx: 210, cy: 365 }, { cx: 173, cy: 297 }, { cx: 173, cy: 253 },
+  { cx: 210, cy: 185 }, { cx: 275, cy: 165 }, { cx: 340, cy: 185 }, { cx: 377, cy: 253 },
+  { cx: 390, cy: 310 }, { cx: 320, cy: 378 }, { cx: 230, cy: 378 }, { cx: 160, cy: 310 },
+];
+
+// Pre-calculated orbit particle positions
+const ORBIT_PARTICLES = [
+  { cx: 505, cy: 275 }, { cx: 275, cy: 505 }, { cx: 45, cy: 275 },
+  { cx: 438, cy: 112 }, { cx: 438, cy: 438 }, { cx: 112, cy: 438 },
+  { cx: 112, cy: 112 }, { cx: 390, cy: 162 },
+];
+
+// Hexagon points pre-calculated
+const HEX_POINTS = "275,220 322,247.5 322,302.5 275,330 228,302.5 228,247.5";
 
 /**
  * JARVIS Arc Reactor - Advanced Tech Edition
  * A breathtaking, futuristic arc reactor with cinematic dynamic animations
  * Inspired by Stark Industries and JARVIS AI technology
- * Features: Rotating rings, energy arcs, plasma waves, hexagonal core
  */
 export default function ArcReactor() {
+  // Memoize arc paths
+  const outerArcs = useMemo(() => 
+    [...Array(12)].map((_, i) => {
+      const startAngle = (i * 30 - 8) * Math.PI / 180;
+      const endAngle = (i * 30 + 8) * Math.PI / 180;
+      const r = 245;
+      const cx = Math.round(275 + r * Math.cos(startAngle));
+      const cy = Math.round(275 + r * Math.sin(startAngle));
+      const ex = Math.round(275 + r * Math.cos(endAngle));
+      const ey = Math.round(275 + r * Math.sin(endAngle));
+      return { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${ex} ${ey}` };
+    }), []
+  );
+  
+  const midArcs = useMemo(() =>
+    [...Array(8)].map((_, i) => {
+      const startAngle = (i * 45 + 12) * Math.PI / 180;
+      const endAngle = (i * 45 + 33) * Math.PI / 180;
+      const r = 200;
+      const cx = Math.round(275 + r * Math.cos(startAngle));
+      const cy = Math.round(275 + r * Math.sin(startAngle));
+      const ex = Math.round(275 + r * Math.cos(endAngle));
+      const ey = Math.round(275 + r * Math.sin(endAngle));
+      return { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${ex} ${ey}` };
+    }), []
+  );
+  
+  const innerArcs = useMemo(() =>
+    [...Array(8)].map((_, i) => {
+      const startAngle = (i * 45 + 10) * Math.PI / 180;
+      const endAngle = (i * 45 + 35) * Math.PI / 180;
+      const r = 155;
+      const cx = Math.round(275 + r * Math.cos(startAngle));
+      const cy = Math.round(275 + r * Math.sin(startAngle));
+      const ex = Math.round(275 + r * Math.cos(endAngle));
+      const ey = Math.round(275 + r * Math.sin(endAngle));
+      return { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${ex} ${ey}` };
+    }), []
+  );
+
   return (
     <div className="relative w-full max-w-[550px] aspect-square flex items-center justify-center mx-auto">
       {/* Outer Plasma Field */}
@@ -129,12 +209,12 @@ export default function ArcReactor() {
         
         {/* ==================== OUTER RING - Energy Nodes ==================== */}
         <g style={{ transformOrigin: '275px 275px', animation: 'jarvis-rotate-slow 25s linear infinite' }}>
-          {/* 12 Large Energy Nodes */}
-          {[...Array(12)].map((_, i) => (
+          {/* Large Energy Nodes */}
+          {OUTER_NODES.map((node, i) => (
             <React.Fragment key={`outer-node-${i}`}>
               <circle
-                cx={275 + 245 * Math.cos((i * 30) * Math.PI / 180)}
-                cy={275 + 245 * Math.sin((i * 30) * Math.PI / 180)}
+                cx={node.cx}
+                cy={node.cy}
                 r="6"
                 fill="none"
                 stroke="url(#jarvisRing1)"
@@ -142,8 +222,8 @@ export default function ArcReactor() {
                 filter="url(#jarvisGlowFilter)"
               />
               <circle
-                cx={275 + 245 * Math.cos((i * 30) * Math.PI / 180)}
-                cy={275 + 245 * Math.sin((i * 30) * Math.PI / 180)}
+                cx={node.cx}
+                cy={node.cy}
                 r="2"
                 fill="rgba(0, 255, 255, 0.9)"
                 filter="url(#jarvisGlowFilter)"
@@ -151,10 +231,10 @@ export default function ArcReactor() {
             </React.Fragment>
           ))}
           {/* Connecting Arcs */}
-          {[...Array(12)].map((_, i) => (
+          {outerArcs.map((arc, i) => (
             <path
               key={`outer-arc-${i}`}
-              d={`M ${275 + 245 * Math.cos((i * 30 - 8) * Math.PI / 180)} ${275 + 245 * Math.sin((i * 30 - 8) * Math.PI / 180)} A 245 245 0 0 1 ${275 + 245 * Math.cos((i * 30 + 8) * Math.PI / 180)} ${275 + 245 * Math.sin((i * 30 + 8) * Math.PI / 180)}`}
+              d={arc.d}
               fill="none"
               stroke="rgba(0, 240, 255, 0.5)"
               strokeWidth="1.5"
@@ -174,12 +254,12 @@ export default function ArcReactor() {
             stroke="rgba(0, 230, 255, 0.2)"
             strokeWidth="1.5"
           />
-          {/* 8 Medium Energy Nodes */}
-          {[...Array(8)].map((_, i) => (
+          {/* Medium Energy Nodes */}
+          {MID_NODES.map((node, i) => (
             <React.Fragment key={`mid-node-${i}`}>
               <circle
-                cx={275 + 200 * Math.cos((i * 45) * Math.PI / 180)}
-                cy={275 + 200 * Math.sin((i * 45) * Math.PI / 180)}
+                cx={node.cx}
+                cy={node.cy}
                 r="8"
                 fill="none"
                 stroke="url(#jarvisRing2)"
@@ -187,8 +267,8 @@ export default function ArcReactor() {
                 filter="url(#jarvisGlowFilter)"
               />
               <circle
-                cx={275 + 200 * Math.cos((i * 45) * Math.PI / 180)}
-                cy={275 + 200 * Math.sin((i * 45) * Math.PI / 180)}
+                cx={node.cx}
+                cy={node.cy}
                 r="3"
                 fill="rgba(0, 255, 255, 0.85)"
                 filter="url(#jarvisGlowFilter)"
@@ -196,10 +276,10 @@ export default function ArcReactor() {
             </React.Fragment>
           ))}
           {/* Energy Arcs */}
-          {[...Array(8)].map((_, i) => (
+          {midArcs.map((arc, i) => (
             <path
               key={`mid-arc-${i}`}
-              d={`M ${275 + 200 * Math.cos((i * 45 + 12) * Math.PI / 180)} ${275 + 200 * Math.sin((i * 45 + 12) * Math.PI / 180)} A 200 200 0 0 1 ${275 + 200 * Math.cos((i * 45 + 33) * Math.PI / 180)} ${275 + 200 * Math.sin((i * 45 + 33) * Math.PI / 180)}`}
+              d={arc.d}
               fill="none"
               stroke="rgba(0, 255, 255, 0.65)"
               strokeWidth="3"
@@ -220,22 +300,22 @@ export default function ArcReactor() {
             strokeWidth="2"
             filter="url(#jarvisGlowFilter)"
           />
-          {/* 16 Small Energy Dots */}
-          {[...Array(16)].map((_, i) => (
+          {/* Small Energy Dots */}
+          {INNER_DOTS.map((dot, i) => (
             <circle
               key={`inner-dot-${i}`}
-              cx={275 + 155 * Math.cos((i * 22.5) * Math.PI / 180)}
-              cy={275 + 155 * Math.sin((i * 22.5) * Math.PI / 180)}
+              cx={dot.cx}
+              cy={dot.cy}
               r="3"
               fill="rgba(0, 255, 255, 0.9)"
               filter="url(#jarvisGlowFilter)"
             />
           ))}
           {/* Inner Energy Arcs */}
-          {[...Array(8)].map((_, i) => (
+          {innerArcs.map((arc, i) => (
             <path
               key={`inner-arc-${i}`}
-              d={`M ${275 + 155 * Math.cos((i * 45 + 10) * Math.PI / 180)} ${275 + 155 * Math.sin((i * 45 + 10) * Math.PI / 180)} A 155 155 0 0 1 ${275 + 155 * Math.cos((i * 45 + 35) * Math.PI / 180)} ${275 + 155 * Math.sin((i * 45 + 35) * Math.PI / 180)}`}
+              d={arc.d}
               fill="none"
               stroke="rgba(0, 255, 255, 0.55)"
               strokeWidth="2"
@@ -256,12 +336,12 @@ export default function ArcReactor() {
             strokeWidth="2.5"
             filter="url(#jarvisGlowFilter)"
           />
-          {/* 24 Tiny Energy Dots */}
-          {[...Array(24)].map((_, i) => (
+          {/* Tiny Energy Dots */}
+          {TINY_DOTS.map((dot, i) => (
             <circle
               key={`tiny-dot-${i}`}
-              cx={275 + 110 * Math.cos((i * 15) * Math.PI / 180)}
-              cy={275 + 110 * Math.sin((i * 15) * Math.PI / 180)}
+              cx={dot.cx}
+              cy={dot.cy}
               r="2"
               fill="rgba(0, 255, 255, 0.95)"
               filter="url(#jarvisGlowFilter)"
@@ -285,12 +365,8 @@ export default function ArcReactor() {
         
         {/* ==================== HEXAGONAL CORE FRAME ==================== */}
         <g style={{ transformOrigin: '275px 275px', animation: 'jarvis-rotate-reverse 5s linear infinite' }}>
-          {/* Hexagon shape */}
           <polygon
-            points={Array.from({ length: 6 }, (_, i) => {
-              const angle = (i * 60 - 90) * Math.PI / 180;
-              return `${275 + 55 * Math.cos(angle)},${275 + 55 * Math.sin(angle)}`;
-            }).join(' ')}
+            points={HEX_POINTS}
             fill="none"
             stroke="rgba(0, 255, 255, 0.6)"
             strokeWidth="3"
@@ -363,7 +439,7 @@ export default function ArcReactor() {
         </g>
         
         {/* Additional Orbiting Particles */}
-        {[...Array(8)].map((_, i) => (
+        {ORBIT_PARTICLES.map((particle, i) => (
           <g 
             key={`orbit-${i}`}
             style={{ 
@@ -372,8 +448,8 @@ export default function ArcReactor() {
             }}
           >
             <circle 
-              cx={275 + 230 * Math.cos(i * 45 * Math.PI / 180)} 
-              cy={275 + 230 * Math.sin(i * 45 * Math.PI / 180)} 
+              cx={particle.cx}
+              cy={particle.cy}
               r={2 + (i % 3) * 0.5} 
               fill={`rgba(0, ${250 - i * 5}, 255, ${0.7 + (i % 3) * 0.1})`}
               filter="url(#jarvisGlowFilter)"
@@ -385,47 +461,23 @@ export default function ArcReactor() {
       {/* CSS Animations */}
       <style jsx>{`
         @keyframes jarvis-plasma {
-          0%, 100% { 
-            opacity: 0.5; 
-            transform: scale(1); 
-          }
-          50% { 
-            opacity: 1; 
-            transform: scale(1.08); 
-          }
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.08); }
         }
         
         @keyframes jarvis-energy {
-          0%, 100% { 
-            opacity: 0.4; 
-            transform: scale(1); 
-          }
-          50% { 
-            opacity: 0.9; 
-            transform: scale(1.15); 
-          }
+          0%, 100% { opacity: 0.4; transform: scale(1); }
+          50% { opacity: 0.9; transform: scale(1.15); }
         }
         
         @keyframes jarvis-core-glow {
-          0%, 100% { 
-            opacity: 0.5; 
-            transform: scale(1); 
-          }
-          50% { 
-            opacity: 1; 
-            transform: scale(1.25); 
-          }
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.25); }
         }
         
         @keyframes jarvis-deco-pulse {
-          0%, 100% { 
-            opacity: 0.12; 
-            stroke-width: 1;
-          }
-          50% { 
-            opacity: 0.25; 
-            stroke-width: 1.5;
-          }
+          0%, 100% { opacity: 0.12; stroke-width: 1; }
+          50% { opacity: 0.25; stroke-width: 1.5; }
         }
         
         @keyframes jarvis-rotate-slow {
@@ -444,58 +496,28 @@ export default function ArcReactor() {
         }
         
         @keyframes jarvis-pulse-ring {
-          0%, 100% { 
-            opacity: 0.5; 
-            stroke-width: 3;
-          }
-          50% { 
-            opacity: 1; 
-            stroke-width: 4.5;
-          }
+          0%, 100% { opacity: 0.5; stroke-width: 3; }
+          50% { opacity: 1; stroke-width: 4.5; }
         }
         
         @keyframes jarvis-hex-pulse {
-          0%, 100% { 
-            opacity: 0.6; 
-            stroke-width: 3;
-          }
-          50% { 
-            opacity: 1; 
-            stroke-width: 4;
-          }
+          0%, 100% { opacity: 0.6; stroke-width: 3; }
+          50% { opacity: 1; stroke-width: 4; }
         }
         
         @keyframes jarvis-core-outer {
-          0%, 100% { 
-            opacity: 0.7; 
-            transform: scale(1); 
-          }
-          50% { 
-            opacity: 1; 
-            transform: scale(1.12); 
-          }
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.12); }
         }
         
         @keyframes jarvis-core-main {
-          0%, 100% { 
-            opacity: 0.95; 
-            transform: scale(1); 
-          }
-          50% { 
-            opacity: 1; 
-            transform: scale(1.05); 
-          }
+          0%, 100% { opacity: 0.95; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.05); }
         }
         
         @keyframes jarvis-inner-ring {
-          0%, 100% { 
-            opacity: 0.35; 
-            transform: scale(1); 
-          }
-          50% { 
-            opacity: 0.65; 
-            transform: scale(1.1); 
-          }
+          0%, 100% { opacity: 0.35; transform: scale(1); }
+          50% { opacity: 0.65; transform: scale(1.1); }
         }
       `}</style>
     </div>

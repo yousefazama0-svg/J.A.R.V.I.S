@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface ArcReactorLogoProps {
   size?: number;
@@ -8,12 +8,62 @@ interface ArcReactorLogoProps {
   showText?: boolean;
 }
 
+// Pre-calculated positions to avoid hydration mismatch
+const OUTER_NODES = [
+  { cx: 94, cy: 50 },
+  { cx: 81, cy: 81 },
+  { cx: 50, cy: 94 },
+  { cx: 19, cy: 81 },
+  { cx: 6, cy: 50 },
+  { cx: 19, cy: 19 },
+  { cx: 50, cy: 6 },
+  { cx: 81, cy: 19 },
+];
+
+const MID_NODES = [
+  { cx: 86, cy: 50 },
+  { cx: 68, cy: 68 },
+  { cx: 50, cy: 86 },
+  { cx: 32, cy: 68 },
+  { cx: 14, cy: 50 },
+  { cx: 32, cy: 32 },
+];
+
+const INNER_DOTS = [
+  { cx: 76, cy: 50 }, { cx: 63, cy: 63 }, { cx: 50, cy: 76 }, { cx: 37, cy: 63 },
+  { cx: 24, cy: 50 }, { cx: 37, cy: 37 }, { cx: 50, cy: 24 }, { cx: 63, cy: 37 },
+  { cx: 72, cy: 57 }, { cx: 57, cy: 72 }, { cx: 43, cy: 72 }, { cx: 28, cy: 57 },
+];
+
 /**
  * JARVIS Arc Reactor Logo - Advanced Tech Edition
  * A stunning, futuristic arc reactor with dynamic animations
  * Inspired by Stark Industries technology
  */
 export default function ArcReactorLogo({ size = 40, className = '', showText = false }: ArcReactorLogoProps) {
+  // Memoize arc paths to avoid recalculation
+  const outerArcs = useMemo(() => 
+    [...Array(8)].map((_, i) => {
+      const startAngle = (i * 45 - 10) * Math.PI / 180;
+      const endAngle = (i * 45 + 10) * Math.PI / 180;
+      const r = 44;
+      return {
+        d: `M ${Math.round(50 + r * Math.cos(startAngle))} ${Math.round(50 + r * Math.sin(startAngle))} A ${r} ${r} 0 0 1 ${Math.round(50 + r * Math.cos(endAngle))} ${Math.round(50 + r * Math.sin(endAngle))}`
+      };
+    }), []
+  );
+  
+  const midArcs = useMemo(() =>
+    [...Array(6)].map((_, i) => {
+      const startAngle = (i * 60 + 15) * Math.PI / 180;
+      const endAngle = (i * 60 + 45) * Math.PI / 180;
+      const r = 36;
+      return {
+        d: `M ${Math.round(50 + r * Math.cos(startAngle))} ${Math.round(50 + r * Math.sin(startAngle))} A ${r} ${r} 0 0 1 ${Math.round(50 + r * Math.cos(endAngle))} ${Math.round(50 + r * Math.sin(endAngle))}`
+      };
+    }), []
+  );
+
   return (
     <div className={`relative flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
       {/* Outer Plasma Field */}
@@ -95,11 +145,11 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
         {/* ========== OUTER RING - Rotating Segments ========== */}
         <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-slow 20s linear infinite' }}>
           {/* Outer ring segments */}
-          {[...Array(8)].map((_, i) => (
+          {OUTER_NODES.map((node, i) => (
             <circle
               key={`outer-seg-${i}`}
-              cx={50 + 44 * Math.cos((i * 45) * Math.PI / 180)}
-              cy={50 + 44 * Math.sin((i * 45) * Math.PI / 180)}
+              cx={node.cx}
+              cy={node.cy}
               r="3"
               fill="none"
               stroke="url(#logoRingGrad)"
@@ -109,10 +159,10 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
             />
           ))}
           {/* Connecting arcs */}
-          {[...Array(8)].map((_, i) => (
+          {outerArcs.map((arc, i) => (
             <path
               key={`outer-arc-${i}`}
-              d={`M ${50 + 44 * Math.cos((i * 45 - 15) * Math.PI / 180)} ${50 + 44 * Math.sin((i * 45 - 15) * Math.PI / 180)} A 44 44 0 0 1 ${50 + 44 * Math.cos((i * 45 + 15) * Math.PI / 180)} ${50 + 44 * Math.sin((i * 45 + 15) * Math.PI / 180)}`}
+              d={arc.d}
               fill="none"
               stroke="rgba(0, 240, 255, 0.6)"
               strokeWidth="1"
@@ -132,21 +182,21 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
             strokeWidth="1"
           />
           {/* Energy nodes */}
-          {[...Array(6)].map((_, i) => (
+          {MID_NODES.map((node, i) => (
             <circle
               key={`mid-node-${i}`}
-              cx={50 + 36 * Math.cos((i * 60) * Math.PI / 180)}
-              cy={50 + 36 * Math.sin((i * 60) * Math.PI / 180)}
+              cx={node.cx}
+              cy={node.cy}
               r="2.5"
               fill="rgba(0, 255, 255, 0.9)"
               filter="url(#logoGlow)"
             />
           ))}
           {/* Energy arcs */}
-          {[...Array(6)].map((_, i) => (
+          {midArcs.map((arc, i) => (
             <path
               key={`mid-arc-${i}`}
-              d={`M ${50 + 36 * Math.cos((i * 60 + 10) * Math.PI / 180)} ${50 + 36 * Math.sin((i * 60 + 10) * Math.PI / 180)} A 36 36 0 0 1 ${50 + 36 * Math.cos((i * 60 + 50) * Math.PI / 180)} ${50 + 36 * Math.sin((i * 60 + 50) * Math.PI / 180)}`}
+              d={arc.d}
               fill="none"
               stroke="rgba(0, 255, 255, 0.7)"
               strokeWidth="2"
@@ -167,11 +217,11 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
             filter="url(#logoGlow)"
           />
           {/* Small energy dots */}
-          {[...Array(12)].map((_, i) => (
+          {INNER_DOTS.map((dot, i) => (
             <circle
               key={`inner-dot-${i}`}
-              cx={50 + 26 * Math.cos((i * 30) * Math.PI / 180)}
-              cy={50 + 26 * Math.sin((i * 30) * Math.PI / 180)}
+              cx={dot.cx}
+              cy={dot.cy}
               r="1.5"
               fill="rgba(0, 255, 255, 0.95)"
               filter="url(#logoGlow)"
@@ -230,40 +280,16 @@ export default function ArcReactorLogo({ size = 40, className = '', showText = f
         
         {/* ========== ORBITING ENERGY PARTICLES ========== */}
         <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-fast 5s linear infinite' }}>
-          <circle 
-            cx="50" 
-            cy="6" 
-            r="2.5" 
-            fill="#ffffff" 
-            filter="url(#logoStrongGlow)"
-          />
+          <circle cx="50" cy="6" r="2.5" fill="#ffffff" filter="url(#logoStrongGlow)" />
         </g>
         <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-reverse 7s linear infinite' }}>
-          <circle 
-            cx="94" 
-            cy="50" 
-            r="2" 
-            fill="#ffffff" 
-            filter="url(#logoStrongGlow)"
-          />
+          <circle cx="94" cy="50" r="2" fill="#ffffff" filter="url(#logoStrongGlow)" />
         </g>
         <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-fast 9s linear infinite' }}>
-          <circle 
-            cx="50" 
-            cy="94" 
-            r="2" 
-            fill="#ffffff" 
-            filter="url(#logoStrongGlow)"
-          />
+          <circle cx="50" cy="94" r="2" fill="#ffffff" filter="url(#logoStrongGlow)" />
         </g>
         <g style={{ transformOrigin: '50px 50px', animation: 'logo-rotate-reverse 11s linear infinite' }}>
-          <circle 
-            cx="6" 
-            cy="50" 
-            r="1.5" 
-            fill="#ffffff" 
-            filter="url(#logoStrongGlow)"
-          />
+          <circle cx="6" cy="50" r="1.5" fill="#ffffff" filter="url(#logoStrongGlow)" />
         </g>
       </svg>
       

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useSyncExternalStore } from 'react';
+import React, { useState, useEffect, useSyncExternalStore, useMemo } from 'react';
 import { MessageSquare, Camera, Video, Presentation } from 'lucide-react';
 
 interface ReactorCoreProps {
@@ -15,6 +15,37 @@ interface ReactorCoreProps {
   };
   language: 'en' | 'ar';
 }
+
+// Pre-calculated positions for outer ring (8 nodes at radius 98)
+const OUTER_NODES = [
+  { cx: 208, cy: 110 }, { cx: 179, cy: 179 }, { cx: 110, cy: 208 }, { cx: 41, cy: 179 },
+  { cx: 12, cy: 110 }, { cx: 41, cy: 41 }, { cx: 110, cy: 12 }, { cx: 179, cy: 41 },
+];
+
+// Pre-calculated positions for mid ring (6 nodes at radius 78)
+const MID_NODES = [
+  { cx: 188, cy: 110 }, { cx: 149, cy: 149 }, { cx: 110, cy: 188 }, { cx: 71, cy: 149 },
+  { cx: 32, cy: 110 }, { cx: 71, cy: 71 },
+];
+
+// Pre-calculated positions for inner ring (12 dots at radius 58)
+const INNER_DOTS = [
+  { cx: 168, cy: 110 }, { cx: 139, cy: 139 }, { cx: 110, cy: 168 }, { cx: 81, cy: 139 },
+  { cx: 52, cy: 110 }, { cx: 81, cy: 81 }, { cx: 110, cy: 52 }, { cx: 139, cy: 81 },
+  { cx: 154, cy: 125 }, { cx: 125, cy: 154 }, { cx: 95, cy: 154 }, { cx: 66, cy: 125 },
+];
+
+// Pre-calculated positions for fourth ring (18 dots at radius 42)
+const TINY_DOTS = [
+  { cx: 152, cy: 110 }, { cx: 143, cy: 135 }, { cx: 125, cy: 152 }, { cx: 95, cy: 152 },
+  { cx: 77, cy: 135 }, { cx: 68, cy: 110 }, { cx: 77, cy: 85 }, { cx: 95, cy: 68 },
+  { cx: 125, cy: 68 }, { cx: 143, cy: 85 }, { cx: 155, cy: 120 }, { cx: 135, cy: 148 },
+  { cx: 110, cy: 152 }, { cx: 85, cy: 148 }, { cx: 65, cy: 120 }, { cx: 65, cy: 100 },
+  { cx: 85, cy: 72 }, { cx: 110, cy: 68 },
+];
+
+// Pre-calculated hexagon points
+const HEX_POINTS = "110,82 128,93 128,117 110,128 92,117 92,93";
 
 // Empty subscription for client-side detection
 const emptySubscribe = () => () => {};
@@ -36,6 +67,33 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
   const [date, setDate] = useState('...');
   const [uptime, setUptime] = useState(0);
   const [greeting, setGreeting] = useState('...');
+  
+  // Memoize arc paths
+  const outerArcs = useMemo(() =>
+    [...Array(8)].map((_, i) => {
+      const startAngle = (i * 45 - 10) * Math.PI / 180;
+      const endAngle = (i * 45 + 10) * Math.PI / 180;
+      const r = 98;
+      const cx = Math.round(110 + r * Math.cos(startAngle));
+      const cy = Math.round(110 + r * Math.sin(startAngle));
+      const ex = Math.round(110 + r * Math.cos(endAngle));
+      const ey = Math.round(110 + r * Math.sin(endAngle));
+      return { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${ex} ${ey}` };
+    }), []
+  );
+  
+  const midArcs = useMemo(() =>
+    [...Array(6)].map((_, i) => {
+      const startAngle = (i * 60 + 15) * Math.PI / 180;
+      const endAngle = (i * 60 + 45) * Math.PI / 180;
+      const r = 78;
+      const cx = Math.round(110 + r * Math.cos(startAngle));
+      const cy = Math.round(110 + r * Math.sin(startAngle));
+      const ex = Math.round(110 + r * Math.cos(endAngle));
+      const ey = Math.round(110 + r * Math.sin(endAngle));
+      return { d: `M ${cx} ${cy} A ${r} ${r} 0 0 1 ${ex} ${ey}` };
+    }), []
+  );
 
   useEffect(() => {
     if (!isClient) return;
@@ -179,11 +237,11 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
             
             {/* Outer Ring - Energy Nodes */}
             <g className="tech-ring-outer" style={{ transformOrigin: '110px 110px' }}>
-              {[...Array(8)].map((_, i) => (
+              {OUTER_NODES.map((node, i) => (
                 <React.Fragment key={`outer-${i}`}>
                   <circle
-                    cx={110 + 98 * Math.cos((i * 45) * Math.PI / 180)}
-                    cy={110 + 98 * Math.sin((i * 45) * Math.PI / 180)}
+                    cx={node.cx}
+                    cy={node.cy}
                     r="4"
                     fill="none"
                     stroke="url(#techRingGrad)"
@@ -191,18 +249,18 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
                     filter="url(#techGlow)"
                   />
                   <circle
-                    cx={110 + 98 * Math.cos((i * 45) * Math.PI / 180)}
-                    cy={110 + 98 * Math.sin((i * 45) * Math.PI / 180)}
+                    cx={node.cx}
+                    cy={node.cy}
                     r="1.5"
                     fill="rgba(0, 255, 255, 0.9)"
                     filter="url(#techGlow)"
                   />
                 </React.Fragment>
               ))}
-              {[...Array(8)].map((_, i) => (
+              {outerArcs.map((arc, i) => (
                 <path
                   key={`outer-arc-${i}`}
-                  d={`M ${110 + 98 * Math.cos((i * 45 - 10) * Math.PI / 180)} ${110 + 98 * Math.sin((i * 45 - 10) * Math.PI / 180)} A 98 98 0 0 1 ${110 + 98 * Math.cos((i * 45 + 10) * Math.PI / 180)} ${110 + 98 * Math.sin((i * 45 + 10) * Math.PI / 180)}`}
+                  d={arc.d}
                   fill="none"
                   stroke="rgba(0, 240, 255, 0.5)"
                   strokeWidth="1"
@@ -214,11 +272,11 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
             {/* Second Ring - Counter */}
             <g className="tech-ring-mid" style={{ transformOrigin: '110px 110px' }}>
               <circle cx="110" cy="110" r="78" fill="none" stroke="rgba(0, 230, 255, 0.2)" strokeWidth="1.5" />
-              {[...Array(6)].map((_, i) => (
+              {MID_NODES.map((node, i) => (
                 <React.Fragment key={`mid-${i}`}>
                   <circle
-                    cx={110 + 78 * Math.cos((i * 60) * Math.PI / 180)}
-                    cy={110 + 78 * Math.sin((i * 60) * Math.PI / 180)}
+                    cx={node.cx}
+                    cy={node.cy}
                     r="5"
                     fill="none"
                     stroke="url(#techRingGrad)"
@@ -226,18 +284,18 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
                     filter="url(#techGlow)"
                   />
                   <circle
-                    cx={110 + 78 * Math.cos((i * 60) * Math.PI / 180)}
-                    cy={110 + 78 * Math.sin((i * 60) * Math.PI / 180)}
+                    cx={node.cx}
+                    cy={node.cy}
                     r="2"
                     fill="rgba(0, 255, 255, 0.85)"
                     filter="url(#techGlow)"
                   />
                 </React.Fragment>
               ))}
-              {[...Array(6)].map((_, i) => (
+              {midArcs.map((arc, i) => (
                 <path
                   key={`mid-arc-${i}`}
-                  d={`M ${110 + 78 * Math.cos((i * 60 + 15) * Math.PI / 180)} ${110 + 78 * Math.sin((i * 60 + 15) * Math.PI / 180)} A 78 78 0 0 1 ${110 + 78 * Math.cos((i * 60 + 45) * Math.PI / 180)} ${110 + 78 * Math.sin((i * 60 + 45) * Math.PI / 180)}`}
+                  d={arc.d}
                   fill="none"
                   stroke="rgba(0, 255, 255, 0.6)"
                   strokeWidth="2"
@@ -249,11 +307,11 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
             {/* Third Ring - Fast */}
             <g className="tech-ring-inner" style={{ transformOrigin: '110px 110px' }}>
               <circle cx="110" cy="110" r="58" fill="none" stroke="rgba(0, 240, 255, 0.3)" strokeWidth="2" filter="url(#techGlow)" />
-              {[...Array(12)].map((_, i) => (
+              {INNER_DOTS.map((dot, i) => (
                 <circle
                   key={`inner-dot-${i}`}
-                  cx={110 + 58 * Math.cos((i * 30) * Math.PI / 180)}
-                  cy={110 + 58 * Math.sin((i * 30) * Math.PI / 180)}
+                  cx={dot.cx}
+                  cy={dot.cy}
                   r="2"
                   fill="rgba(0, 255, 255, 0.9)"
                   filter="url(#techGlow)"
@@ -264,11 +322,11 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
             {/* Fourth Ring - Counter Fast */}
             <g className="tech-ring-fourth" style={{ transformOrigin: '110px 110px' }}>
               <circle cx="110" cy="110" r="42" fill="none" stroke="rgba(0, 240, 255, 0.4)" strokeWidth="2" filter="url(#techGlow)" />
-              {[...Array(18)].map((_, i) => (
+              {TINY_DOTS.map((dot, i) => (
                 <circle
                   key={`tiny-${i}`}
-                  cx={110 + 42 * Math.cos((i * 20) * Math.PI / 180)}
-                  cy={110 + 42 * Math.sin((i * 20) * Math.PI / 180)}
+                  cx={dot.cx}
+                  cy={dot.cy}
                   r="1.5"
                   fill="rgba(0, 255, 255, 0.95)"
                   filter="url(#techGlow)"
@@ -279,10 +337,7 @@ export default function ReactorCore({ translations, language }: ReactorCoreProps
             {/* Hexagonal Core Frame */}
             <g className="tech-hex-frame" style={{ transformOrigin: '110px 110px' }}>
               <polygon
-                points={Array.from({ length: 6 }, (_, i) => {
-                  const angle = (i * 60 - 90) * Math.PI / 180;
-                  return `${110 + 28 * Math.cos(angle)},${110 + 28 * Math.sin(angle)}`;
-                }).join(' ')}
+                points={HEX_POINTS}
                 fill="none"
                 stroke="rgba(0, 255, 255, 0.6)"
                 strokeWidth="2"
