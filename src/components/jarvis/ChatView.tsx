@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Upload, Sparkles, Image, Video, Presentation, Code2, Copy, Check, StopCircle, Trash2, Download, RotateCcw } from 'lucide-react';
+import { Send, Upload, Image, Video, Presentation, Code2, Copy, Check, StopCircle, Trash2, Download, RotateCcw } from 'lucide-react';
+import ArcReactorLogo from './ArcReactorLogo';
 
 interface Message {
   id: number;
@@ -348,15 +349,7 @@ export default function ChatView({ onNavigate, translations, language }: ChatVie
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: '1px solid #0e1a3a' }}>
         <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 flex items-center justify-center rounded-lg"
-            style={{
-              background: 'linear-gradient(135deg, #00e5ff20, #7c5cff20)',
-              border: '1px solid #00e5ff30',
-            }}
-          >
-            <Sparkles size={14} style={{ color: '#00e5ff' }} />
-          </div>
+          <ArcReactorLogo size={32} />
           <div>
             <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: '#d0e4f8' }}>
               {translations.aiChat}
@@ -447,16 +440,7 @@ export default function ChatView({ onNavigate, translations, language }: ChatVie
           <div className="flex flex-col items-center justify-center h-full gap-5 jarvis-animate-fade-in">
             {/* JARVIS Icon */}
             <div className="relative">
-              <div
-                className="w-16 h-16 flex items-center justify-center rounded-full"
-                style={{
-                  background: 'linear-gradient(135deg, #00e5ff10, #7c5cff10)',
-                  border: '1px solid rgba(0, 229, 255, 0.2)',
-                  boxShadow: '0 0 30px rgba(0, 229, 255, 0.08)',
-                }}
-              >
-                <Sparkles size={28} style={{ color: '#00e5ff' }} />
-              </div>
+              <ArcReactorLogo size={64} />
               <div
                 className="absolute inset-0 rounded-full"
                 style={{
