@@ -42,17 +42,22 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
   en: {
     // Navigation
     home: 'Home',
+    chat: 'Chat',
+    photo: 'Photo',
+    video: 'Video',
+    voice: 'Voice',
+    slides: 'Slides',
+    gallery: 'Gallery',
+    settings: 'Settings',
     aiChat: 'AI Chat',
     photoStudio: 'Photo Studio',
     videoEngine: 'Video Engine',
     voiceAssistant: 'Voice',
     slidesBuilder: 'Slides',
     mediaGallery: 'Gallery',
-    settings: 'Settings',
 
     // Header
     system: 'System',
-    voice: 'Voice',
     online: 'Online',
     live: 'LIVE',
     
@@ -246,17 +251,22 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
   ar: {
     // Navigation
     home: 'الرئيسية',
+    chat: 'محادثة',
+    photo: 'صور',
+    video: 'فيديو',
+    voice: 'صوت',
+    slides: 'عروض',
+    gallery: 'معرض',
+    settings: 'إعدادات',
     aiChat: 'المحادثة',
     photoStudio: 'الصور',
     videoEngine: 'الفيديو',
     voiceAssistant: 'الصوت',
     slidesBuilder: 'العروض',
     mediaGallery: 'المعرض',
-    settings: 'الإعدادات',
 
     // Header
     system: 'النظام',
-    voice: 'الصوت',
     online: 'متصل',
     live: 'مباشر',
     

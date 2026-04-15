@@ -47,6 +47,13 @@ const TRANSITION_OPTIONS: { value: TransitionType; label: string; labelAr: strin
   { value: 'none', label: 'None', labelAr: 'بدون' },
 ];
 
+// Helper function to get random transition from selected ones
+const getRandomTransition = (transitions: TransitionType[]): TransitionType => {
+  if (transitions.length === 0) return 'fade';
+  if (transitions.includes('none')) return 'none';
+  return transitions[Math.floor(Math.random() * transitions.length)];
+};
+
 const LAYOUT_ICONS: Record<string, React.ReactNode> = {
   'title-slide': <Type size={12} />,
   content: <FileText size={12} />,
@@ -89,7 +96,7 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
   const [topic, setTopic] = useState('');
   const [slideCount, setSlideCount] = useState(8);
   const [style, setStyle] = useState<SlideStyle>('Professional');
-  const [transition, setTransition] = useState<TransitionType>('fade');
+  const [selectedTransitions, setSelectedTransitions] = useState<TransitionType[]>(['fade']);
   const [isGenerating, setIsGenerating] = useState(false);
   const [slides, setSlides] = useState<Slide[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -100,6 +107,7 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentTransition, setCurrentTransition] = useState<TransitionType>('fade');
   const prevSlideRef = useRef(currentSlide);
 
   useEffect(() => {
@@ -195,6 +203,10 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
       setIsTransitioning(true);
       prevSlideRef.current = currentSlide;
       
+      // Get random transition from selected transitions
+      const transition = getRandomTransition(selectedTransitions);
+      setCurrentTransition(transition);
+      
       // Transition duration varies by type
       const duration = transition === 'none' ? 100 : 
                       transition === 'flip' ? 500 : 
@@ -205,25 +217,46 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
         setTimeout(() => setIsTransitioning(false), duration);
       }, 100);
     }
-  }, [slides.length, currentSlide, isTransitioning, transition]);
+  }, [slides.length, currentSlide, isTransitioning, selectedTransitions]);
+
+  const toggleTransition = useCallback((t: TransitionType) => {
+    setSelectedTransitions(prev => {
+      if (t === 'none') {
+        // If 'none' is clicked, toggle it
+        return prev.includes('none') ? [] : ['none'];
+      }
+      
+      // Remove 'none' if other transition is selected
+      const filtered = prev.filter(tr => tr !== 'none');
+      
+      if (filtered.includes(t)) {
+        // Remove if already selected
+        const newTransitions = filtered.filter(tr => tr !== t);
+        return newTransitions.length === 0 ? ['fade'] : newTransitions;
+      } else {
+        // Add new transition
+        return [...filtered, t];
+      }
+    });
+  }, []);
 
   const getTransitionClass = (isEntering: boolean) => {
-    if (transition === 'none') return '';
+    if (currentTransition === 'none') return '';
     
     const direction = transitionDirection;
     
     // Handle reverse animations for slide and flip
-    const needsReverse = (transition === 'slide' || transition === 'flip') && direction === 'backward';
+    const needsReverse = (currentTransition === 'slide' || currentTransition === 'flip') && direction === 'backward';
     
     if (needsReverse) {
       return isEntering 
-        ? `slide-transition-${transition}-reverse-enter`
-        : `slide-transition-${transition}-reverse-exit`;
+        ? `slide-transition-${currentTransition}-reverse-enter`
+        : `slide-transition-${currentTransition}-reverse-exit`;
     }
     
     return isEntering 
-      ? `slide-transition-${transition}-enter`
-      : `slide-transition-${transition}-exit`;
+      ? `slide-transition-${currentTransition}-enter`
+      : `slide-transition-${currentTransition}-exit`;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -292,7 +325,7 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
           </div>
           <div className="flex items-center gap-3">
             <span className="text-[8px] px-2 py-0.5 rounded" style={{ background: 'rgba(0, 229, 255, 0.1)', color: '#00e5ff' }}>
-              {TRANSITION_OPTIONS.find(t => t.value === transition)?.[language === 'ar' ? 'labelAr' : 'label']}
+              {TRANSITION_OPTIONS.find(t => t.value === currentTransition)?.[language === 'ar' ? 'labelAr' : 'label']}
             </span>
             <span className="text-[10px] font-mono" style={{ color: '#f59e0b' }}>{formatSlideNumber(currentSlide + 1, slides.length)}</span>
             <button onClick={() => setIsPreviewMode(false)} className="p-1.5 rounded-lg" style={{ background: 'rgba(8, 14, 30, 0.8)', border: '1px solid #0e1a3a' }}>
@@ -397,14 +430,39 @@ export default function SlidesView({ initialTopic, translations, language }: Sli
               {translations.transition || (language === 'ar' ? 'الانتقال' : 'Transition')}
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {TRANSITION_OPTIONS.map(t => (
-                <button key={t.value} onClick={() => setTransition(t.value)} className="px-2.5 py-1 rounded-md text-[9px] transition-all"
-                  style={{ background: transition === t.value ? 'rgba(0, 229, 255, 0.15)' : 'rgba(0, 229, 255, 0.04)', border: `1px solid ${transition === t.value ? 'rgba(0, 229, 255, 0.35)' : 'rgba(0, 229, 255, 0.1)'}`, color: transition === t.value ? '#00e5ff' : '#90a8cc' }}>
-                  {language === 'ar' ? t.labelAr : t.label}
-                </button>
-              ))}
+              {TRANSITION_OPTIONS.map(t => {
+                const isSelected = selectedTransitions.includes(t.value);
+                const isNoneSelected = selectedTransitions.includes('none');
+                const isDisabled = t.value !== 'none' && isNoneSelected;
+                
+                return (
+                  <button 
+                    key={t.value} 
+                    onClick={() => toggleTransition(t.value)} 
+                    className="px-2.5 py-1 rounded-md text-[9px] transition-all flex items-center gap-1"
+                    disabled={isDisabled}
+                    style={{ 
+                      background: isSelected ? 'rgba(0, 229, 255, 0.15)' : 'rgba(0, 229, 255, 0.04)', 
+                      border: `1px solid ${isSelected ? 'rgba(0, 229, 255, 0.35)' : 'rgba(0, 229, 255, 0.1)'}`, 
+                      color: isSelected ? '#00e5ff' : isDisabled ? 'rgba(144, 168, 204, 0.3)' : '#90a8cc',
+                      opacity: isDisabled ? 0.5 : 1,
+                      cursor: isDisabled ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {isSelected && <Check size={10} />}
+                    {language === 'ar' ? t.labelAr : t.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
+          {selectedTransitions.length > 1 && !selectedTransitions.includes('none') && (
+            <div className="text-[8px] px-2 py-1 rounded mb-3" style={{ color: 'rgba(0, 229, 255, 0.6)', background: 'rgba(0, 229, 255, 0.05)' }}>
+              {language === 'ar' 
+                ? `سيتم اختيار انتقال عشوائي من ${selectedTransitions.length} انتقالات`
+                : `Random transition will be picked from ${selectedTransitions.length} selected`}
+            </div>
+          )}
 
           <button onClick={generateSlides} disabled={!topic.trim() || isGenerating}
             className="w-full py-2.5 rounded-xl text-[11px] font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-2"
