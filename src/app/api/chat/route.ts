@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { groqStreamChat, groqChatCompletion, isAIConfigured } from "@/lib/ai";
+import { getZAI } from "@/lib/zai";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -49,16 +49,6 @@ const JARVIS_SYSTEM_PROMPT = `You are J.A.R.V.I.S (Just A Rather Very Intelligen
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if API is configured
-    if (!isAIConfigured()) {
-      return new Response(JSON.stringify({ 
-        error: "API key not configured. Please add GROQ_API_KEY in Vercel Environment Variables." 
-      }), { 
-        status: 500, 
-        headers: { "Content-Type": "application/json" } 
-      });
-    }
-
     const body: ChatRequestBody = await request.json();
     const { messages, mode = "general", systemPrompt, stream = true } = body;
 
@@ -74,24 +64,66 @@ export async function POST(request: NextRequest) {
     };
 
     const fullMessages: ChatMessage[] = [systemMessage, ...messages];
+    const zai = await getZAI();
 
     if (stream === false) {
-      const content = await groqChatCompletion({ messages: fullMessages });
+      const completion = await zai.chat.completions.create({
+        messages: fullMessages,
+        thinking: { type: 'disabled' }
+      });
+
+      const content = completion.choices?.[0]?.message?.content || "I apologize, sir. I was unable to process that request.";
+
       return new Response(JSON.stringify({ content, mode, timestamp: new Date().toISOString() }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
 
-    // Streaming response
+    const sdkStream = await zai.chat.completions.create({
+      messages: fullMessages,
+      stream: true,
+      thinking: { type: 'disabled' }
+    });
+
     const encoder = new TextEncoder();
+
     const readableStream = new ReadableStream({
       async start(controller) {
+        const reader = (sdkStream as ReadableStream<Uint8Array>).getReader();
+        const decoder = new TextDecoder();
+        let lineBuffer = "";
+
         try {
-          await groqStreamChat({
-            messages: fullMessages,
-            onToken: (token) => {
-              const ssePayload = JSON.stringify({ content: token });
-              controller.enqueue(encoder.encode(`data: ${ssePayload}\n\n`));
-            },
-          });
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunkText = decoder.decode(value, { stream: true });
+            lineBuffer += chunkText;
+
+            const lines = lineBuffer.split("\n");
+            lineBuffer = lines.pop() || "";
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed.startsWith("data: ")) continue;
+
+              const data = trimmed.slice(6).trim();
+
+              if (data === "[DONE]") {
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                return;
+              }
+
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content || "";
+                if (content) {
+                  const ssePayload = JSON.stringify({ content });
+                  controller.enqueue(encoder.encode(`data: ${ssePayload}\n\n`));
+                }
+              } catch { /* Skip malformed */ }
+            }
+          }
+
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         } catch (error) {
           console.error("[JARVIS Chat] Stream error:", error);
@@ -99,6 +131,7 @@ export async function POST(request: NextRequest) {
           controller.enqueue(encoder.encode(`data: ${errMsg}\n\n`));
         } finally {
           controller.close();
+          reader.releaseLock();
         }
       },
     });

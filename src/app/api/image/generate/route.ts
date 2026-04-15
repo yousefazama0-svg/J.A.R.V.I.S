@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { getZAI } from "@/lib/zai";
 
 interface GenerateRequest {
   prompt: string;
@@ -16,34 +17,39 @@ export async function POST(request: NextRequest) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
 
-    // Map aspect ratios to dimensions
-    const sizeMap: Record<string, { width: number; height: number }> = {
-      '1:1': { width: 1024, height: 1024 },
-      '16:9': { width: 1344, height: 768 },
-      '9:16': { width: 768, height: 1344 },
-      '4:3': { width: 1152, height: 864 },
-      '3:4': { width: 864, height: 1152 },
+    const zai = await getZAI();
+
+    // Map aspect ratios to supported sizes
+    const sizeMap: Record<string, string> = {
+      '1:1': '1024x1024',
+      '16:9': '1344x768',
+      '9:16': '768x1344',
+      '4:3': '1152x864',
+      '3:4': '864x1152',
     };
 
-    const { width, height } = sizeMap[aspectRatio] || { width: 1024, height: 1024 };
+    const size = sizeMap[aspectRatio] || '1024x1024';
 
-    // Build the full prompt
-    const fullPrompt = `${prompt}, ${style} style, high quality, detailed, professional`;
+    // Use ZAI Image Generation
+    const imageResponse = await zai.images.generations.create({
+      prompt: `${prompt}, ${style} style, high quality, detailed`,
+      size: size as any,
+    });
+
+    const imageData = imageResponse.data?.[0];
     
-    // Using Pollinations.ai - Free image generation, no API key needed!
-    const encodedPrompt = encodeURIComponent(fullPrompt);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&enhance=true`;
+    if (imageData?.base64) {
+      return new Response(JSON.stringify({ 
+        image: `data:image/png;base64,${imageData.base64}`,
+        prompt,
+        style,
+        size
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
 
-    // For the response, we'll return the URL directly
-    // The client will fetch and display it
     return new Response(JSON.stringify({ 
-      image: imageUrl,
-      prompt,
-      style,
-      size: `${width}x${height}`,
-      provider: "Pollinations.ai"
-    }), { status: 200, headers: { "Content-Type": "application/json" } });
-
+      error: "Failed to generate image" 
+    }), { status: 500, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     console.error("[Image Generate] Error:", error);
     const message = error instanceof Error ? error.message : "Failed to generate image";
