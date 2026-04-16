@@ -147,7 +147,7 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
       </div>
 
       {/* Core Modules Grid */}
-      <div className="px-4 pb-3">
+      <div className="px-4 pb-3 jarvis-animate-fade-in">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles size={11} style={{ color: '#00e5ff' }} />
           <span className="text-[9px] tracking-widest uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
@@ -156,13 +156,14 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {coreModules.map((module) => {
+          {coreModules.map((module, idx) => {
             const Icon = module.icon;
             return (
               <button
                 key={module.id}
                 onClick={() => handleNavigate(module.id)}
-                className="jarvis-mod-card text-left group"
+                className="jarvis-mod-card text-left group jarvis-animate-fade-in"
+                style={{ animationDelay: `${idx * 80}ms` }}
               >
                 <div className="flex items-start justify-between mb-1.5">
                   <div 
@@ -182,7 +183,7 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
       </div>
 
       {/* New AI Tools */}
-      <div className="px-4 pb-3">
+      <div className="px-4 pb-3 jarvis-animate-fade-in" style={{ animationDelay: '150ms' }}>
         <div className="flex items-center gap-2 mb-2">
           <Zap size={11} style={{ color: '#ec4899' }} />
           <span className="text-[9px] tracking-widest uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
@@ -191,13 +192,14 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {newTools.map((tool) => {
+          {newTools.map((tool, idx) => {
             const Icon = tool.icon;
             return (
               <button
                 key={tool.id}
                 onClick={() => handleNavigate(tool.id)}
-                className="jarvis-mod-card text-left group"
+                className="jarvis-mod-card text-left group jarvis-animate-fade-in"
+                style={{ animationDelay: `${(idx + 6) * 80}ms` }}
               >
                 <div className="flex items-start justify-between mb-1.5">
                   <div 
@@ -219,7 +221,7 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
       </div>
 
       {/* Capabilities */}
-      <div className="px-4 pb-3">
+      <div className="px-4 pb-3 jarvis-animate-fade-in" style={{ animationDelay: '300ms' }}>
         <div className="flex items-center gap-2 mb-2">
           <Shield size={11} style={{ color: '#10b981' }} />
           <span className="text-[9px] tracking-widest uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
@@ -233,8 +235,8 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
             return (
               <div
                 key={idx}
-                className="flex items-center gap-2 p-2 rounded-lg transition-all hover:scale-105"
-                style={{ background: `${cap.color}08`, border: `1px solid ${cap.color}15` }}
+                className="flex items-center gap-2 p-2 rounded-lg transition-all hover:scale-105 jarvis-animate-fade-in"
+                style={{ background: `${cap.color}08`, border: `1px solid ${cap.color}15`, animationDelay: `${(idx + 10) * 60}ms` }}
               >
                 <Icon size={12} style={{ color: cap.color }} />
                 <span className="text-[9px]" style={{ color: '#90a8cc' }}>{cap.label}</span>
@@ -245,7 +247,7 @@ export default function HomeView({ onNavigate, translations, language }: HomeVie
       </div>
 
       {/* Quick Stats */}
-      <div className="px-4 pb-20 md:pb-4">
+      <div className="px-4 pb-20 md:pb-4 jarvis-animate-fade-in" style={{ animationDelay: '450ms' }}>
         <div className="jarvis-hud-card p-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[9px] tracking-widest uppercase" style={{ color: 'rgba(144, 168, 204, 0.5)' }}>
