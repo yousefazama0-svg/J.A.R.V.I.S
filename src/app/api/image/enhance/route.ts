@@ -2,48 +2,121 @@ import { NextRequest } from "next/server";
 import { getZAI } from "@/lib/zai";
 
 interface EnhanceRequest {
-  prompt: string;
-  style: string;
-  language: string;
+  image: string;
+  quality: 'medium' | 'high' | 'ultra';
+  options?: {
+    brightness?: number;
+    contrast?: number;
+    saturation?: number;
+    sharpness?: number;
+    denoise?: number;
+  };
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: EnhanceRequest = await request.json();
-    const { prompt, style, language } = body;
+    const { image, quality = 'high', options } = body;
 
-    if (!prompt?.trim()) {
-      return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    if (!image) {
+      return new Response(JSON.stringify({ error: "Image is required" }), { 
+        status: 400, 
+        headers: { "Content-Type": "application/json" } 
+      });
     }
 
     const zai = await getZAI();
 
-    const systemPrompt = `You are an expert at enhancing image prompts for AI image generation.
-Given a basic prompt, enhance it with details about composition, lighting, atmosphere, style, color palette, and mood.
-Return ONLY the enhanced prompt, nothing else.`;
+    // Build enhancement prompt based on quality and options
+    const qualityDescriptions = {
+      medium: 'moderately enhanced, balanced improvements',
+      high: 'highly enhanced, professional photography quality, crisp details',
+      ultra: 'ultra high quality, masterpiece, stunning detail, award-winning photography'
+    };
 
-    const userPrompt = language === 'ar'
-      ? `حسّن هذا الوصف لإنشاء صورة بأسلوب ${style}: "${prompt}"`
-      : `Enhance this prompt for ${style} style image generation: "${prompt}"`;
+    const enhancementInstructions: string[] = [];
+    
+    if (options) {
+      if (options.brightness && options.brightness !== 100) {
+        const level = options.brightness > 100 ? 'brighter lighting' : 'dramatic moody lighting';
+        enhancementInstructions.push(level);
+      }
+      if (options.contrast && options.contrast !== 100) {
+        const level = options.contrast > 100 ? 'high contrast, bold tones' : 'soft contrast, gentle tones';
+        enhancementInstructions.push(level);
+      }
+      if (options.saturation && options.saturation !== 100) {
+        const level = options.saturation > 100 ? 'vibrant saturated colors' : 'muted subtle colors';
+        enhancementInstructions.push(level);
+      }
+      if (options.sharpness && options.sharpness > 100) {
+        enhancementInstructions.push('razor sharp details');
+      }
+      if (options.denoise && options.denoise > 0) {
+        enhancementInstructions.push('clean, smooth, noise-free');
+      }
+    }
 
-    const completion = await zai.chat.completions.create({
+    const enhancementText = enhancementInstructions.length > 0 
+      ? enhancementInstructions.join(', ')
+      : qualityDescriptions[quality];
+
+    // Use VLM to describe the image first
+    const descriptionResponse = await zai.chat.completions.createVision({
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
+        { 
+          role: "user",
+          content: [
+            { 
+              type: "text", 
+              text: "Describe this image in detail for AI image generation. Include: subject, composition, lighting, colors, mood, style, and atmosphere. Be concise but comprehensive." 
+            },
+            { 
+              type: "image_url", 
+              image_url: { url: `data:image/png;base64,${image}` } 
+            }
+          ]
+        }
       ],
       thinking: { type: 'disabled' }
     });
 
-    const enhancedPrompt = completion.choices?.[0]?.message?.content || prompt;
+    const imageDescription = descriptionResponse.choices?.[0]?.message?.content || 'A beautiful image';
+
+    // Generate enhanced image based on the description
+    const enhancePrompt = `${imageDescription}, ${enhancementText}, professional photography, high quality, detailed, 8k resolution`;
+
+    const generationResponse = await zai.images.generations.create({
+      prompt: enhancePrompt,
+      size: '1024x1024'
+    });
+
+    const enhancedImage = generationResponse.data?.[0]?.base64;
+
+    if (!enhancedImage) {
+      return new Response(JSON.stringify({ error: "Failed to generate enhanced image" }), { 
+        status: 500, 
+        headers: { "Content-Type": "application/json" } 
+      });
+    }
 
     return new Response(JSON.stringify({ 
-      original: prompt,
-      enhanced: enhancedPrompt,
-      style 
-    }), { status: 200, headers: { "Content-Type": "application/json" } });
+      image: enhancedImage,
+      size: '1024x1024',
+      quality: quality,
+      original_description: imageDescription,
+      enhancement_prompt: enhancePrompt
+    }), { 
+      status: 200, 
+      headers: { "Content-Type": "application/json" } 
+    });
+
   } catch (error) {
     console.error("[Image Enhance] Error:", error);
-    const message = error instanceof Error ? error.message : "Failed to enhance prompt";
-    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { "Content-Type": "application/json" } });
+    const message = error instanceof Error ? error.message : "Failed to enhance image";
+    return new Response(JSON.stringify({ error: message }), { 
+      status: 500, 
+      headers: { "Content-Type": "application/json" } 
+    });
   }
 }

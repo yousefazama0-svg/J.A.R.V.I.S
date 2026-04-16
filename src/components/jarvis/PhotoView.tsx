@@ -362,6 +362,11 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
         base64Data = base64Data.split(',')[1];
       }
       
+      // Validate base64 data
+      if (!base64Data || base64Data.length === 0) {
+        throw new Error('No image data available');
+      }
+      
       // Create blob from base64
       const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
@@ -396,7 +401,10 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
       // Fallback: try direct download using data URL
       try {
         const link = document.createElement('a');
-        link.href = `data:image/png;base64,${image.image}`;
+        const imageData = image.image.includes('data:image') 
+          ? image.image 
+          : `data:image/png;base64,${image.image}`;
+        link.href = imageData;
         link.download = `jarvis-image-${Date.now()}.png`;
         document.body.appendChild(link);
         link.click();
@@ -1057,7 +1065,9 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
 
           <div className="max-w-4xl max-h-[85vh] flex flex-col items-center gap-3" onClick={e => e.stopPropagation()}>
             <img
-              src={`data:image/png;base64,${lightboxImage.image}`}
+              src={lightboxImage.image.includes('data:image') 
+                ? lightboxImage.image 
+                : `data:image/png;base64,${lightboxImage.image}`}
               alt={lightboxImage.prompt}
               className="max-w-full max-h-[75vh] rounded-xl object-contain"
               style={{ border: '1px solid #0e1a3a' }}
