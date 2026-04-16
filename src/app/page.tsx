@@ -183,7 +183,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Slides
     aiPresentationCreator: 'AI Presentation Creator',
     topic: 'Topic',
-    slides: 'Slides',
+    slidesCount: 'Slides',
     buildPresentation: 'Build Presentation',
     buildingPresentation: 'Building Presentation...',
     noPresentationsYet: 'No presentations yet',
@@ -204,9 +204,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     deleteSelected: 'Delete Selected',
     yourGalleryEmpty: 'Your gallery is empty',
     yourGallerySub: 'Generated content will appear here',
-    noImagesSub: 'Create images to see them here',
-    noVideosSub: 'Create videos to see them here',
-    noPresentationsSub: 'Create presentations to see them here',
+    galleryNoImagesSub: 'Create images to see them here',
+    galleryNoVideosSub: 'Create videos to see them here',
+    galleryNoPresSub: 'Create presentations to see them here',
     download: 'Download',
     delete: 'Delete',
 
@@ -249,8 +249,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     resetAll: 'Reset All',
     busy: 'Busy',
     away: 'Away',
-    image: 'Image',
-    video: 'Video',
+    imageType: 'Image',
+    videoType: 'Video',
     
     // New Tools - Translator
     translator: 'Translator',
@@ -416,7 +416,7 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     mayTakeMinutes: 'قد يستغرق هذا عدة دقائق...',
     fps: 'إطارات/ثانية',
     resolution: 'الدقة',
-    speed: 'السرعة',
+    videoSpeed: 'السرعة',
     stabilize: 'تثبيت',
     colorGrade: 'تصحيح الألوان',
     mp4: 'MP4',
@@ -447,8 +447,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     // Slides
     aiPresentationCreator: 'منشئ العروض التقديمية',
     topic: 'الموضوع',
-    slides: 'الشرائح',
-    style: 'النمط',
+    slidesCount: 'الشرائح',
+    slidesStyle: 'النمط',
     buildPresentation: 'بناء العرض',
     buildingPresentation: 'جارٍ بناء العرض...',
     noPresentationsYet: 'لا توجد عروض بعد',
@@ -469,9 +469,9 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     deleteSelected: 'حذف المحدد',
     yourGalleryEmpty: 'معرضك فارغ',
     yourGallerySub: 'المحتوى المنشأ سيظهر هنا',
-    noImagesSub: 'أنشئ صوراً لرؤيتها هنا',
-    noVideosSub: 'أنشئ فيديوهات لرؤيتها هنا',
-    noPresentationsSub: 'أنشئ عروضاً لرؤيتها هنا',
+    galleryNoImagesSub: 'أنشئ صوراً لرؤيتها هنا',
+    galleryNoVideosSub: 'أنشئ فيديوهات لرؤيتها هنا',
+    galleryNoPresSub: 'أنشئ عروضاً لرؤيتها هنا',
     download: 'تحميل',
     delete: 'حذف',
 
@@ -514,8 +514,8 @@ const TRANSLATIONS: Record<Language, Record<string, string>> = {
     resetAll: 'إعادة تعيين الكل',
     busy: 'مشغول',
     away: 'بعيد',
-    image: 'صورة',
-    video: 'فيديو',
+    imageType: 'صورة',
+    videoType: 'فيديو',
     
     // New Tools - Translator
     translator: 'المترجم',
@@ -1219,7 +1219,7 @@ export default function Home() {
           language={language}
           onLogin={handleLogin}
           onClose={() => setShowLogin(false)}
-          onGuestContinue={() => setShowLogin(false)}
+          isOpen={showLogin}
         />
       )}
     </div>
