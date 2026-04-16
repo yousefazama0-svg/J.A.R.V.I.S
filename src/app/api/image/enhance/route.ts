@@ -29,31 +29,31 @@ export async function POST(request: NextRequest) {
 
     // Build enhancement prompt based on quality and options
     const qualityDescriptions = {
-      medium: 'moderately enhanced, balanced improvements',
-      high: 'highly enhanced, professional photography quality, crisp details',
-      ultra: 'ultra high quality, masterpiece, stunning detail, award-winning photography'
+      medium: 'moderately enhanced, balanced improvements, good lighting',
+      high: 'highly enhanced, professional photography quality, crisp details, perfect lighting',
+      ultra: 'ultra high quality, masterpiece, stunning detail, award-winning photography, 8k resolution'
     };
 
     const enhancementInstructions: string[] = [];
     
     if (options) {
       if (options.brightness && options.brightness !== 100) {
-        const level = options.brightness > 100 ? 'brighter lighting' : 'dramatic moody lighting';
+        const level = options.brightness > 100 ? 'brighter lighting, well-lit' : 'dramatic moody lighting, shadows';
         enhancementInstructions.push(level);
       }
       if (options.contrast && options.contrast !== 100) {
-        const level = options.contrast > 100 ? 'high contrast, bold tones' : 'soft contrast, gentle tones';
+        const level = options.contrast > 100 ? 'high contrast, bold tones, dramatic' : 'soft contrast, gentle tones, smooth';
         enhancementInstructions.push(level);
       }
       if (options.saturation && options.saturation !== 100) {
-        const level = options.saturation > 100 ? 'vibrant saturated colors' : 'muted subtle colors';
+        const level = options.saturation > 100 ? 'vibrant saturated colors, vivid' : 'muted subtle colors, pastel tones';
         enhancementInstructions.push(level);
       }
       if (options.sharpness && options.sharpness > 100) {
-        enhancementInstructions.push('razor sharp details');
+        enhancementInstructions.push('razor sharp details, crystal clear');
       }
       if (options.denoise && options.denoise > 0) {
-        enhancementInstructions.push('clean, smooth, noise-free');
+        enhancementInstructions.push('clean, smooth, noise-free, pristine');
       }
     }
 
@@ -61,30 +61,43 @@ export async function POST(request: NextRequest) {
       ? enhancementInstructions.join(', ')
       : qualityDescriptions[quality];
 
-    // Use VLM to describe the image first
-    const descriptionResponse = await zai.chat.completions.createVision({
-      messages: [
-        { 
-          role: "user",
-          content: [
-            { 
-              type: "text", 
-              text: "Describe this image in detail for AI image generation. Include: subject, composition, lighting, colors, mood, style, and atmosphere. Be concise but comprehensive." 
-            },
-            { 
-              type: "image_url", 
-              image_url: { url: `data:image/png;base64,${image}` } 
-            }
-          ]
-        }
-      ],
-      thinking: { type: 'disabled' }
-    });
+    // Use VLM to describe the image first - handle potential errors
+    let imageDescription = 'A beautiful image';
+    
+    try {
+      // Ensure the image URL is properly formatted
+      const imageUrl = image.startsWith('data:image') 
+        ? image 
+        : `data:image/png;base64,${image}`;
+      
+      const descriptionResponse = await zai.chat.completions.createVision({
+        messages: [
+          { 
+            role: "user",
+            content: [
+              { 
+                type: "text", 
+                text: "Describe this image briefly for AI image enhancement. Focus on: subject, scene, colors, and mood. Keep it under 100 words." 
+              },
+              { 
+                type: "image_url", 
+                image_url: { url: imageUrl } 
+              }
+            ]
+          }
+        ],
+        thinking: { type: 'disabled' }
+      });
 
-    const imageDescription = descriptionResponse.choices?.[0]?.message?.content || 'A beautiful image';
+      imageDescription = descriptionResponse.choices?.[0]?.message?.content || imageDescription;
+    } catch (vlmError) {
+      console.error("[Image Enhance] VLM error, using fallback:", vlmError);
+      // Continue with generic description if VLM fails
+      imageDescription = 'A professionally captured photograph';
+    }
 
     // Generate enhanced image based on the description
-    const enhancePrompt = `${imageDescription}, ${enhancementText}, professional photography, high quality, detailed, 8k resolution`;
+    const enhancePrompt = `${imageDescription}, ${enhancementText}, professional photography, high quality, detailed`;
 
     const generationResponse = await zai.images.generations.create({
       prompt: enhancePrompt,
