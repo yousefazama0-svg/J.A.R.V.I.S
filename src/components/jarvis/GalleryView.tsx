@@ -142,7 +142,13 @@ export default function GalleryView({ translations, language }: GalleryViewProps
   const downloadImage = useCallback((item: GalleryItem, format: 'png' | 'jpg' | 'webp' = 'png') => {
     if (!item.image) return;
     try {
-      const byteCharacters = atob(item.image);
+      // Get raw base64 data (remove prefix if exists)
+      let base64Data = item.image;
+      if (base64Data.includes(',')) {
+        base64Data = base64Data.split(',')[1];
+      }
+      
+      const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) byteNumbers[i] = byteCharacters.charCodeAt(i);
       const byteArray = new Uint8Array(byteNumbers);
@@ -154,13 +160,28 @@ export default function GalleryView({ translations, language }: GalleryViewProps
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `jarvis-${item.id}.${extension}`;
+      link.download = `jarvis-image-${item.id}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       setShowDownloadDropdown(null);
-    } catch { /* ignore */ }
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: try direct download using data URL
+      try {
+        const link = document.createElement('a');
+        const base64Data = item.image?.includes(',') ? item.image : `data:image/png;base64,${item.image}`;
+        link.href = base64Data;
+        link.download = `jarvis-image-${item.id}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setShowDownloadDropdown(null);
+      } catch (fallbackError) {
+        console.error('Fallback download also failed:', fallbackError);
+      }
+    }
   }, []);
 
   const downloadVideo = useCallback((item: GalleryItem, format: 'mp4' | 'webm' | 'mov' = 'mp4') => {
@@ -246,7 +267,15 @@ export default function GalleryView({ translations, language }: GalleryViewProps
               <div key={item.id} className="jarvis-mod-card p-0 overflow-hidden group jarvis-animate-fade-in">
                 <div className="relative aspect-video cursor-pointer overflow-hidden" onClick={() => setLightboxItem(item)} style={{ background: '#060a14' }}>
                   {item.type === 'image' && item.image && (
-                    <img src={`data:image/png;base64,${item.image}`} alt={item.prompt || ''} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img 
+                      src={item.image.includes('data:image') ? item.image : `data:image/png;base64,${item.image}`} 
+                      alt={item.prompt || ''} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        console.error('Image load error');
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   )}
                   {item.type === 'video' && (
                     <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #060a14, #0e1a3a)' }}>
@@ -339,7 +368,15 @@ export default function GalleryView({ translations, language }: GalleryViewProps
           <div className="max-w-4xl max-h-[85vh] flex flex-col items-center gap-3 overflow-y-auto" onClick={e => e.stopPropagation()}>
             {lightboxItem.type === 'image' && lightboxItem.image && (
               <>
-                <img src={`data:image/png;base64,${lightboxItem.image}`} alt={lightboxItem.prompt || ''} className="max-w-full max-h-[70vh] rounded-xl object-contain" style={{ border: '1px solid #0e1a3a' }} />
+                <img 
+                  src={lightboxItem.image.includes('data:image') ? lightboxItem.image : `data:image/png;base64,${lightboxItem.image}`} 
+                  alt={lightboxItem.prompt || ''} 
+                  className="max-w-full max-h-[70vh] rounded-xl object-contain" 
+                  style={{ border: '1px solid #0e1a3a' }}
+                  onError={(e) => {
+                    console.error('Lightbox image load error');
+                  }}
+                />
                 <p className="text-[10px] text-center max-w-lg" style={{ color: '#90a8cc' }}>{lightboxItem.prompt}</p>
               </>
             )}

@@ -356,7 +356,14 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
 
   const downloadImage = useCallback((image: GeneratedImage, format: 'png' | 'jpg' | 'webp' = 'png') => {
     try {
-      const byteCharacters = atob(image.image);
+      // Get raw base64 data (remove prefix if exists)
+      let base64Data = image.image;
+      if (base64Data.includes(',')) {
+        base64Data = base64Data.split(',')[1];
+      }
+      
+      // Create blob from base64
+      const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -378,13 +385,27 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `jarvis-${image.id}.${extension}`;
+      link.download = `jarvis-image-${Date.now()}.${extension}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       setShowDownloadDropdown(null);
-    } catch { /* Download failed */ }
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: try direct download using data URL
+      try {
+        const link = document.createElement('a');
+        link.href = `data:image/png;base64,${image.image}`;
+        link.download = `jarvis-image-${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setShowDownloadDropdown(null);
+      } catch (fallbackError) {
+        console.error('Fallback download also failed:', fallbackError);
+      }
+    }
   }, []);
 
   const copyPrompt = useCallback((text: string, id: number) => {
@@ -879,20 +900,30 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {images.map(img => (
-                <div
-                  key={img.id}
-                  className="jarvis-mod-card p-0 overflow-hidden group jarvis-animate-fade-in"
-                >
+              {images.map(img => {
+                // Handle both cases: with or without data URL prefix
+                const imageSrc = img.image.includes('data:image') 
+                  ? img.image 
+                  : `data:image/png;base64,${img.image}`;
+                
+                return (
+                  <div
+                    key={img.id}
+                    className="jarvis-mod-card p-0 overflow-hidden group jarvis-animate-fade-in"
+                  >
                   {/* Image */}
                   <div
                     className="relative aspect-square cursor-pointer overflow-hidden"
                     onClick={() => setLightboxImage(img)}
                   >
                     <img
-                      src={`data:image/png;base64,${img.image}`}
+                      src={imageSrc}
                       alt={img.prompt}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        console.error('Image load error');
+                        e.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%230e1a3a" width="100" height="100"/><text fill="%2390a8cc" x="50" y="50" text-anchor="middle" dy=".3em" font-size="10">Error</text></svg>';
+                      }}
                     />
                     {/* Hover overlay */}
                     <div
@@ -981,7 +1012,8 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
