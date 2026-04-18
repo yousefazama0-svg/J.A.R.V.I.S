@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
 import { getZAI } from "@/lib/zai";
 
+// Set max duration for this API route (Vercel/serverless)
+export const maxDuration = 300; // 5 minutes
+
 interface GenerateRequest {
   prompt: string;
   style: string;
@@ -19,6 +22,10 @@ const SIZE_MAP: Record<string, string> = {
   '720x1440': '768x1344',
   '1920x1080': '1344x768',
   '1080x1920': '768x1344',
+  '1536x1024': '1024x1024',
+  '1024x1536': '1024x1024',
+  '1792x1024': '1344x768',
+  '1024x1792': '768x1344',
 };
 
 export async function POST(request: NextRequest) {
@@ -37,7 +44,9 @@ export async function POST(request: NextRequest) {
     const size = SIZE_MAP[requestedSize] || '1024x1024';
 
     // Enhanced prompt for better quality
-    const enhancedPrompt = `${prompt}, ${style?.toLowerCase() || 'realistic'} style, ultra high quality, highly detailed, 8k resolution, professional photography, sharp focus, beautiful lighting`;
+    const enhancedPrompt = `${prompt}, ${style?.toLowerCase() || 'realistic'} style, ultra high quality, highly detailed, professional photography, sharp focus, beautiful lighting`;
+
+    console.log("[Image Generate] Starting generation for:", prompt.substring(0, 50));
 
     const imageResponse = await zai.images.generations.create({
       prompt: enhancedPrompt,
@@ -47,6 +56,7 @@ export async function POST(request: NextRequest) {
     const imageData = imageResponse.data?.[0];
     
     if (imageData?.base64) {
+      console.log("[Image Generate] Successfully generated image");
       // Return raw base64 without prefix - frontend will add it
       return new Response(JSON.stringify({ 
         image: imageData.base64,
@@ -59,6 +69,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    console.error("[Image Generate] No image data in response");
     return new Response(JSON.stringify({ 
       error: "Failed to generate image - no data returned" 
     }), { 

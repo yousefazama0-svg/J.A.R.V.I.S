@@ -236,6 +236,12 @@ export default function PhotoView({ initialPrompt, translations, language }: Pho
         body: JSON.stringify({ prompt: finalPrompt, size: selectedSize, style: selectedStyle }),
       });
 
+      // Check if response is JSON
+      const contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned an invalid response. The request may have timed out.');
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
