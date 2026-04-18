@@ -13,7 +13,7 @@ interface GenerateRequest {
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateRequest = await request.json();
-    const { prompt, style, duration = 10, quality = 'balanced', fps = 30 } = body;
+    const { prompt, style, duration = 5, quality = 'speed', fps = 30 } = body;
 
     if (!prompt?.trim()) {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { 
@@ -25,17 +25,22 @@ export async function POST(request: NextRequest) {
     const zai = await getZAI();
 
     // Enhanced prompt for better video quality
-    const enhancedPrompt = `${prompt}, ${style || 'cinematic'} style, high quality, smooth motion, professional cinematography, 4K quality`;
+    const enhancedPrompt = `${prompt}, ${style || 'cinematic'} style, high quality, smooth motion, professional cinematography`;
 
-    // ZAI supports up to 10 seconds per clip, for longer videos we'll generate multiple clips
-    // For durations > 10s, we'll use the maximum supported and note it
-    const clipDuration = Math.min(duration, 10);
+    // ZAI supports only 5 or 10 seconds
+    const clipDuration = duration <= 5 ? 5 : 10;
     
+    // Quality must be 'speed' or 'quality'
+    const videoQuality = quality === 'quality' ? 'quality' : 'speed';
+    
+    // FPS must be 30 or 60
+    const videoFps = fps === 60 ? 60 : 30;
+
     const task = await zai.video.generations.create({
       prompt: enhancedPrompt,
-      quality: quality as any || 'balanced',
-      duration: clipDuration as any,
-      fps: fps || 30
+      quality: videoQuality as 'speed' | 'quality',
+      duration: clipDuration as 5 | 10,
+      fps: videoFps as 30 | 60
     });
 
     if (task.id) {
@@ -45,9 +50,8 @@ export async function POST(request: NextRequest) {
         status: task.task_status || "PROCESSING",
         prompt,
         style,
-        duration,
-        requestedDuration: duration,
-        message: duration > 10 ? `Video generation started. For ${duration}s duration, multiple clips may be generated.` : undefined
+        duration: clipDuration,
+        quality: videoQuality
       }), { 
         status: 200, 
         headers: { "Content-Type": "application/json" } 
