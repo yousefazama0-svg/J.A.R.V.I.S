@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getZAI } from "@/lib/zai";
 
-// Set max duration for this API route (Vercel/serverless)
+// Set max duration for this API route
 export const maxDuration = 300; // 5 minutes
 
 interface GenerateRequest {
@@ -54,12 +54,12 @@ export async function POST(request: NextRequest) {
     });
 
     const imageData = imageResponse.data?.[0];
+    const base64Image = imageData?.base64;
     
-    if (imageData?.base64) {
+    if (base64Image) {
       console.log("[Image Generate] Successfully generated image");
-      // Return raw base64 without prefix - frontend will add it
       return new Response(JSON.stringify({ 
-        image: imageData.base64,
+        image: base64Image,
         prompt,
         style: style || 'Realistic',
         size: requestedSize || '1024x1024'

@@ -5,10 +5,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  // Allow API routes to run for up to 5 minutes
-  experimental: {
-    maxDuration: 300,
-  },
 };
 
 export default nextConfig;
